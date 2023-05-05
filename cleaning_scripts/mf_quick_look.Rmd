@@ -1,0 +1,65 @@
+---
+title: "Quick look at data sources"
+author: "Mandip Farmahan"
+date: "2023-05-05"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+import data sets
+
+### inpatient
+
+```{r}
+
+
+in_age_and_sex <- read_csv("../data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_age_and_sex.csv")
+in_treat_and_deprivation <- read_csv("../data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_and_simd.csv")
+in_treat_and_speciality <- read_csv("../data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_and_specialty.csv")
+```
+
+```{r}
+tibble_inpatient <- tibble(
+  "age_sex" = names(in_age_and_sex),
+  "treat_deprivation" = names(in_treat_and_deprivation),
+  "treat_speciality" = names(in_treat_and_speciality)
+)
+```
+
+### A&E
+
+```{r}
+ae_monthly_activity <- read_csv("../data/raw_data/monthly_ae_activity_202303.csv")
+ae_monthly_wait <- read_csv("../data/raw_data/monthly_ae_waitingtimes_202303.csv")
+ae_monthly_demo <- read_csv("../data/raw_data/opendata_monthly_ae_demographics_202303.csv")
+ae_monthly_discharge <- read_csv("../data/raw_data/opendata_monthly_ae_discharge_202303.csv")
+```
+
+```{r}
+tibble_ae_monthly <- tibble(
+  "ae_monthly_activity" = names(ae_monthly_activity),
+  "ae_monthly_wait" = names(ae_monthly_wait),
+  "ae_monthly_demo" = c(names(ae_monthly_demo), 1:14),
+  "ae_monthly_discharge" = c(names(ae_monthly_discharge), 1:15)
+)
+```
+
+
+#### bed info
+
+```{r}
+bed_notes <- read_csv("../data/raw_data/notes.csv")
+bed_treat_speciality <- read_csv("../data/raw_data/beds_by_nhs_board_of_treatment_and_specialty.csv")
+
+```
+
+```{r}
+tibble_beds <- tibble(
+  "speciality" = names(bed_treat_speciality)
+)
+```
+

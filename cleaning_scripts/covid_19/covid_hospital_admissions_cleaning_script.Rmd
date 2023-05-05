@@ -1,0 +1,215 @@
+---
+title: "Covid-19 data cleaning script"
+author: "Mandip Farmahan"
+date: "2023-05-05"
+output: html_document
+---
+
+## Import libraries
+
+```{r}
+library(tidyverse)
+library(here)
+library(tsibble)
+```
+
+## Import data files
+
+```{r, message=FALSE}
+# Covid Hospital Admissions
+
+hb_agesex <- read_csv(here("data/raw_data/covid_19/hospital_admissions_hb_agesex_20230504.csv"))
+hb_specialty <- read_csv(here("data/raw_data/covid_19/hospital_admissions_hb_specialty_20230504.csv"))
+hscp_agesex <- read_csv(here("data/raw_data/covid_19/hospital_admissions_hscp_agesex_20230504.csv"))
+hscp_specialty <- read_csv(here("data/raw_data/covid_19/hospital_admissions_hscp_specialty_20230504.csv"))
+```
+
+```{r, message=FALSE}
+# Helper files
+
+hb_names <- read_csv(here("data/raw_data/covid_19/health_board_names.csv"))
+qualifier_info <- read_csv(here("data/raw_data/covid_19/qualifier_info.csv"))
+```
+
+```{r}
+tibble_cv_admissions <- tibble(
+  "hb_agesex" = names(hb_agesex),
+  "hb_specialty" = c(names(hb_specialty), 1:2),
+  "hscp_agesex" = c(names(hscp_agesex), ""),
+  "hscp_specialty" = c(names(hscp_specialty), 1:3)
+)
+```
+
+<br>
+
+----
+
+# Data Analysis
+
+## Admissions By Health Board, Age and Sex
+
+```{r}
+head(hb_agesex)
+
+hb_agesex %>% 
+  count(HBQF)
+
+hb_agesex %>% 
+  count(AgeGroup, AgeGroupQF)
+
+hb_agesex %>% 
+  count(Sex, SexQF)
+
+hb_agesex %>% 
+  count(AdmissionType, AdmissionTypeQF)
+```
+
+```{r}
+hb_agesex_ts <- hb_agesex %>% 
+  mutate(year = year(ymd(WeekEnding)),
+         month = month(ymd(WeekEnding)),
+         .after = WeekEnding
+         ) %>% 
+  mutate(pre_post_diff = NumberAdmissions - Average20182019)
+
+```
+
+```{r}
+# count by AgeGroup
+hb_agesex_ts %>%
+  group_by(AgeGroup, year, month) %>% 
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+  ggplot(aes(x = month, y = num_admissions, colour = AgeGroup))+
+  geom_point()+
+    scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+  facet_wrap(~ year, nrow = 1)
+
+# count by AgeGroup -- removed unknown "All ages" group
+hb_agesex_ts %>%
+  filter(is.na(AgeGroupQF)) %>% 
+  group_by(AgeGroup, year, month) %>% 
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+  ggplot(aes(x = month, y = num_admissions, colour = AgeGroup))+
+  geom_line()+
+  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+  facet_wrap(~ year, nrow = 1)
+```
+
+
+```{r}
+# count difference from 2018/2019 by AgeGroup
+hb_agesex_ts %>%
+  filter(is.na(AgeGroupQF)) %>% 
+  group_by(AgeGroup, year, month) %>% 
+  summarise(num_admissions = mean(pre_post_diff, na.rm = TRUE)) %>% 
+  ggplot(aes(x = month, y = num_admissions, colour = AgeGroup))+
+  geom_point()+
+  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+  facet_wrap(~ year, nrow = 1)
+
+# percentage difference from 2018/2019 by AgeGroup
+hb_agesex_ts %>%
+  filter(is.na(AgeGroupQF)) %>% 
+  group_by(AgeGroup, year, month) %>% 
+  summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
+  ggplot(aes(x = month, y = percentage_diff, colour = AgeGroup))+
+  geom_point()+
+  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+  facet_wrap(~ year, nrow = 1)
+
+# percentage difference from 2018/2019 by AgeGroup 
+hb_agesex_ts %>%
+  filter(is.na(AgeGroupQF)) %>% 
+  group_by(AgeGroup, year, month) %>% 
+  summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
+  ggplot(aes(x = month, y = percentage_diff, colour = AgeGroup))+
+  geom_point()+
+  ylim(-50, 50)+ # smaller scale to focus on central area
+  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+  facet_wrap(~ year, nrow = 1)
+```
+
+Summary: There doesn't seem to be a huge change pre and post covid outbreak, when compared across the ages. If anything, it looks like there is a decrease in admissions for most age groups, possibly as there were no beds available for non-covid cases. The exceptions are children (14 and under) and elderly (85 and over) in 2021 onwards.
+
+The most notable data points are in April 2020 (huge dip), which I believe is when the news broke in the UK about covid as the cases first started being talked about in the media (March/April). I can't remember if we were put into lock down but WFH definitely started then started then. 
+
+<br>
+
+---
+
+## Admissions By Health Board and Deprivation
+
+file is empty
+
+<br>
+
+---
+
+## Admissions By Health Board and Specialty
+
+```{r}
+head(hb_specialty)
+
+```
+
+<br>
+
+---
+
+## Admissions By HSCP, Age and Sex
+
+```{r}
+head(hscp_agesex)
+```
+
+<br>
+
+---
+
+## Admissions By HSCP and Deprivation
+
+file is empty
+
+<br>
+
+---
+
+## Admissions By HSCP and Specialty
+
+```{r}
+head(hscp_specialty)
+```
+
+<br>
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

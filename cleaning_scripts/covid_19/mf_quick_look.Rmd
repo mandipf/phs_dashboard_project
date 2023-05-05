@@ -1,0 +1,93 @@
+---
+title: "Quick look at data sources"
+author: "Mandip Farmahan"
+date: "2023-05-05"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+
+import data sets
+
+### inpatient
+
+```{r}
+
+
+in_age_and_sex <- read_csv(here("data/raw_data/inpatient/inpatient_and_daycase_by_nhs_board_of_treatment_age_and_sex.csv"))
+in_treat_and_deprivation <- read_csv(here("data/raw_data/inpatient/inpatient_and_daycase_by_nhs_board_of_treatment_and_simd.csv"))
+in_treat_and_speciality <- read_csv(here("data/raw_data/inpatient/inpatient_and_daycase_by_nhs_board_of_treatment_and_specialty.csv"))
+```
+
+```{r}
+tibble_inpatient <- tibble(
+  "age_sex" = names(in_age_and_sex),
+  "treat_deprivation" = names(in_treat_and_deprivation),
+  "treat_speciality" = names(in_treat_and_speciality)
+)
+```
+
+### A&E
+
+```{r}
+ae_monthly_activity <- read_csv(here("data/raw_data/a_e/monthly_ae_activity_202303.csv"))
+ae_monthly_wait <- read_csv(here("data/raw_data/a_e/monthly_ae_waitingtimes_202303.csv"))
+ae_monthly_demo <- read_csv(here("data/raw_data/a_e/opendata_monthly_ae_demographics_202303.csv"))
+ae_monthly_discharge <- read_csv(here("data/raw_data/a_e/opendata_monthly_ae_discharge_202303.csv"))
+```
+
+```{r}
+tibble_ae_monthly <- tibble(
+  "ae_monthly_activity" = names(ae_monthly_activity),
+  "ae_monthly_wait" = names(ae_monthly_wait),
+  "ae_monthly_demo" = c(names(ae_monthly_demo), 1:14),
+  "ae_monthly_discharge" = c(names(ae_monthly_discharge), 1:15)
+)
+```
+
+
+#### bed info
+
+```{r}
+bed_notes <- read_csv(here("data/raw_data/beds/notes.csv"))
+bed_treat_speciality <- read_csv(here("data/raw_data/beds/beds_by_nhs_board_of_treatment_and_specialty.csv"))
+
+```
+
+```{r}
+tibble_beds <- tibble(
+  "speciality" = names(bed_treat_speciality)
+)
+```
+
+
+#### Covid-19 admissions
+
+```{r}
+cv_hb_agesex <- read_csv(here("data/raw_data/covid_19/hospital_admissions_hb_agesex_20230504.csv"))
+cv_hb_simd <- read_csv(here("data/raw_data/covid_19/hospital_admissions_hb_simd_20230504.csv"))
+cv_hb_specialty <- read_csv(here("data/raw_data/covid_19/hospital_admissions_hb_specialty_20230504.csv"))
+cv_hscp_agesex <- read_csv(here("data/raw_data/covid_19/hospital_admissions_hscp_agesex_20230504.csv"))
+cv_hscp_simd <- read_csv(here("data/raw_data/covid_19/hospital_admissions_hscp_simd_20230504.csv"))
+cv_hscp_specialty <- read_csv(here("data/raw_data/covid_19/hospital_admissions_hscp_specialty_20230504.csv"))
+```
+
+```{r}
+tibble_cv_admissions <- tibble(
+  "hb_agesex" = names(cv_hb_agesex),
+  "hb_simd" = c(names(cv_hb_simd), 1:3),
+  "hb_specialty" = c(names(cv_hb_specialty), 1:2),
+  "hscp_agesex" = c(names(cv_hscp_agesex), ""),
+  "hscp_simd" = c(names(cv_hscp_simd), 1:4),
+  "hscp_specialty" = c(names(cv_hscp_specialty), 1:3)
+)
+```
+
+
+
+
+

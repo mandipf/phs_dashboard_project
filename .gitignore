@@ -47,4 +47,6 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
-data/raw_data/*.csv
+
+# Raw data folder
+data/raw_data/

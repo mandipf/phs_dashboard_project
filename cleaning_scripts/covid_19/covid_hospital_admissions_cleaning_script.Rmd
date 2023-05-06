@@ -2,7 +2,11 @@
 title: "Covid-19 data cleaning script"
 author: "Mandip Farmahan"
 date: "2023-05-05"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_float: true
+  pdf_document: default
 ---
 
 ## Import libraries
@@ -27,7 +31,10 @@ hscp_specialty <- read_csv(here("data/raw_data/covid_19/hospital_admissions_hscp
 ```{r, message=FALSE}
 # Helper files
 
-hb_names <- read_csv(here("data/raw_data/covid_19/health_board_names.csv"))
+hb_names <- read_csv(here("data/raw_data/covid_19/health_board_names.csv")) %>% 
+  select(HB, HBName)
+hscp_names<- read_csv(here("data/raw_data/covid_19/hscp_names.csv")) %>% 
+  select(HSCP, HSCPName, HB, HBName)
 qualifier_info <- read_csv(here("data/raw_data/covid_19/qualifier_info.csv"))
 ```
 
@@ -52,7 +59,12 @@ tibble_cv_admissions <- tibble(
 head(hb_agesex)
 
 hb_agesex %>% 
-  count(HBQF)
+  filter(WeekEnding == 20200105,
+         HB == "S08000015") %>% 
+  summarise(count = sum(NumberAdmissions, na.rm = TRUE))
+
+hb_agesex %>% 
+  count(HB, HBQF)
 
 hb_agesex %>% 
   count(AgeGroup, AgeGroupQF)
@@ -69,26 +81,117 @@ hb_agesex_ts <- hb_agesex %>%
   mutate(year = year(ymd(WeekEnding)),
          month = month(ymd(WeekEnding)),
          .after = WeekEnding
-         ) %>% 
-  mutate(pre_post_diff = NumberAdmissions - Average20182019)
-
+  ) %>% 
+  mutate(AgeGroup = case_when(AgeGroup == "Under 5" ~ "0 - 05",
+                              AgeGroup == "5 - 14" ~ "05 - 14",
+                              TRUE ~ AgeGroup)) %>%
+  mutate(pre_post_diff = NumberAdmissions - Average20182019) %>% 
+  left_join(hb_names, by = "HB")
 ```
 
-```{r}
-# count by AgeGroup
-hb_agesex_ts %>%
-  group_by(AgeGroup, year, month) %>% 
-  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
-  ggplot(aes(x = month, y = num_admissions, colour = AgeGroup))+
-  geom_point()+
-    scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
-  facet_wrap(~ year, nrow = 1)
+```{r, echo=FALSE}
+# # count by AgeGroup
+# hb_agesex_ts %>%
+#   group_by(AgeGroup, year, month) %>% 
+#   summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+#   ggplot(aes(x = month, y = num_admissions, colour = AgeGroup))+
+#   geom_point()+
+#   scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+#   facet_wrap(~ year, nrow = 1)
+# 
+# # count by AgeGroup -- removed unknown "All ages" group
+# hb_agesex_ts %>%
+#   filter(is.na(AgeGroupQF)) %>% 
+#   group_by(AgeGroup, year, month) %>% 
+#   summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+#   ggplot(aes(x = month, y = num_admissions, colour = AgeGroup))+
+#   geom_line()+
+#   scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+#   facet_wrap(~ year, nrow = 1)
+# 
+# # count by AgeGroup -- removed unknown "All ages" group (YEAR ONLY)
+# hb_agesex_ts %>%
+#   filter(is.na(AgeGroupQF)) %>% 
+#   group_by(AgeGroup, year) %>% 
+#   summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+#   ggplot(aes(x = year, y = num_admissions, colour = AgeGroup))+
+#   geom_line()
+# 
+# # count by AgeGroup -- across each location (time unit = 1 week)
+# hb_agesex_ts %>%
+#   left_join(hb_names, by = "HB") %>% 
+#   filter(!is.na(HBName),
+#          is.na(AgeGroupQF)) %>% 
+#   group_by(AgeGroup, HBName) %>% 
+#   summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+#   ggplot(aes(x = AgeGroup, y = num_admissions, colour = HBName, group = HBName))+
+#   geom_line()+
+#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
 
-# count by AgeGroup -- removed unknown "All ages" group
+```{r, echo=FALSE}
+# # count difference from 2018/2019 by AgeGroup
+# hb_agesex_ts %>%
+#   filter(is.na(AgeGroupQF)) %>% 
+#   group_by(AgeGroup, year, month) %>% 
+#   summarise(num_admissions = mean(pre_post_diff, na.rm = TRUE)) %>% 
+#   ggplot(aes(x = month, y = num_admissions, colour = AgeGroup))+
+#   geom_point()+
+#   scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+#   facet_wrap(~ year, nrow = 1)
+# 
+# # percentage difference from 2018/2019 by AgeGroup
+# hb_agesex_ts %>%
+#   filter(is.na(AgeGroupQF)) %>% 
+#   group_by(AgeGroup, year, month) %>% 
+#   summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
+#   ggplot(aes(x = month, y = percentage_diff, colour = AgeGroup))+
+#   geom_point()+
+#   scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+#   facet_wrap(~ year, nrow = 1)
+# 
+# # percentage difference from 2018/2019 by AgeGroup 
+# hb_agesex_ts %>%
+#   filter(is.na(AgeGroupQF)) %>% 
+#   group_by(AgeGroup, year, month) %>% 
+#   summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
+#   ggplot(aes(x = month, y = percentage_diff, colour = AgeGroup))+
+#   geom_point()+
+#   ylim(-50, 50)+ # smaller scale to focus on central area
+#   scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+#   facet_wrap(~ year, nrow = 1)
+# 
+# # percentage difference from 2018/2019 by AgeGroup (YEAR ONLY)
+# hb_agesex_ts %>%
+#   filter(is.na(AgeGroupQF)) %>% 
+#   group_by(AgeGroup, year) %>% 
+#   summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
+#   ggplot(aes(x = year, y = percentage_diff, colour = AgeGroup))+
+#   geom_line()
+# 
+# # percentage difference from 2018/2019 by AgeGroup and location (time unit = 1 week)
+# hb_agesex_ts %>%
+#   left_join(hb_names, by = "HB") %>% 
+#   filter(!is.na(HBName),
+#          is.na(AgeGroupQF)) %>% 
+#   group_by(AgeGroup, HBName) %>% 
+#   summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
+#   ggplot(aes(x = AgeGroup, y = percentage_diff, colour = HBName, group = HBName))+
+#   geom_line()+
+#   ylim(-50, 50)+ # smaller scale to focus on central area
+#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+### Age
+
+Split by year (Weekly average number of admissions per year)
+
+```{r}
+# number of admissions-- MONTHLY CHECK FOR PATTERNS
 hb_agesex_ts %>%
-  filter(is.na(AgeGroupQF)) %>% 
-  group_by(AgeGroup, year, month) %>% 
-  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+  filter(is.na(AgeGroupQF)) %>%
+  group_by(AgeGroup, year, month) %>%
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>%
   ggplot(aes(x = month, y = num_admissions, colour = AgeGroup))+
   geom_line()+
   scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
@@ -97,36 +200,60 @@ hb_agesex_ts %>%
 
 
 ```{r}
-# count difference from 2018/2019 by AgeGroup
+# number of admissions
 hb_agesex_ts %>%
-  filter(is.na(AgeGroupQF)) %>% 
-  group_by(AgeGroup, year, month) %>% 
-  summarise(num_admissions = mean(pre_post_diff, na.rm = TRUE)) %>% 
-  ggplot(aes(x = month, y = num_admissions, colour = AgeGroup))+
-  geom_point()+
-  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
-  facet_wrap(~ year, nrow = 1)
+  # filter(!is.na(HBName)) %>% # uncomment to include location
+  filter(is.na(AgeGroupQF)) %>%
+  group_by(AgeGroup, year) %>% 
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = num_admissions, colour = AgeGroup))+
+  geom_line()
 
-# percentage difference from 2018/2019 by AgeGroup
+# percentage difference from 2018/2019
 hb_agesex_ts %>%
+  # filter(!is.na(HBName)) %>% # uncomment to include location
   filter(is.na(AgeGroupQF)) %>% 
-  group_by(AgeGroup, year, month) %>% 
+  group_by(AgeGroup, year) %>% 
   summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
-  ggplot(aes(x = month, y = percentage_diff, colour = AgeGroup))+
-  geom_point()+
-  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
-  facet_wrap(~ year, nrow = 1)
+  ggplot(aes(x = year, y = percentage_diff, colour = AgeGroup))+
+  geom_line()
+```
 
-# percentage difference from 2018/2019 by AgeGroup 
+### Gender
+
+Split by year (Weekly average number of admissions per year)
+
+```{r}
+# number of admissions -- MONTHLY CHECK FOR PATTERNS
 hb_agesex_ts %>%
-  filter(is.na(AgeGroupQF)) %>% 
-  group_by(AgeGroup, year, month) %>% 
-  summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
-  ggplot(aes(x = month, y = percentage_diff, colour = AgeGroup))+
-  geom_point()+
-  ylim(-50, 50)+ # smaller scale to focus on central area
+  filter(is.na(SexQF)) %>%
+  group_by(Sex, year, month) %>%
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>%
+  ggplot(aes(x = month, y = num_admissions, colour = Sex))+
+  geom_line()+
   scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
   facet_wrap(~ year, nrow = 1)
+```
+
+
+```{r}
+# number of admissions
+hb_agesex_ts %>%
+  # filter(!is.na(HBName)) %>% # uncomment to include location
+  filter(is.na(SexQF)) %>%
+  group_by(Sex, year) %>% 
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = num_admissions, colour = Sex))+
+  geom_line()
+
+# percentage difference from 2018/2019
+hb_agesex_ts %>%
+  # filter(!is.na(HBName)) %>% # uncomment to include location
+  filter(is.na(SexQF)) %>% 
+  group_by(Sex, year) %>% 
+  summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = percentage_diff, colour = Sex))+
+  geom_line()
 ```
 
 Summary: There doesn't seem to be a huge change pre and post covid outbreak, when compared across the ages. If anything, it looks like there is a decrease in admissions for most age groups, possibly as there were no beds available for non-covid cases. The exceptions are children (14 and under) and elderly (85 and over) in 2021 onwards.
@@ -150,6 +277,77 @@ file is empty
 ```{r}
 head(hb_specialty)
 
+hb_specialty %>% 
+  filter(WeekEnding == 20200105,
+         HB == "S08000015") %>% 
+  summarise(count = sum(NumberAdmissions, na.rm = TRUE))
+
+hb_specialty %>% 
+  count(AdmissionType, AdmissionTypeQF)
+
+hb_specialty %>% 
+  count(Specialty, SpecialtyQF)
+
+```
+
+```{r}
+hb_specialty_ts <- hb_specialty %>% 
+  mutate(year = year(ymd(WeekEnding)),
+         month = month(ymd(WeekEnding)),
+         .after = WeekEnding
+  ) %>% 
+  mutate(pre_post_diff = NumberAdmissions - Average20182019) %>% 
+  left_join(hb_names, by = "HB")
+```
+
+
+```{r}
+# number of admissions-- MONTHLY CHECK FOR PATTERNS
+hb_specialty_ts %>%
+  filter(is.na(SpecialtyQF)) %>%
+  group_by(Specialty, AdmissionType, year, month) %>%
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>%
+  ggplot(aes(x = month, y = num_admissions, colour = Specialty))+
+  geom_line()+
+  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+  facet_wrap(AdmissionType ~ year)
+
+# number of admissions-- MONTHLY CHECK FOR PATTERNS - remove generic specialty
+hb_specialty_ts %>%
+  filter(is.na(SpecialtyQF)) %>%
+  filter(!is.na(Specialty),
+         !str_detect(Specialty, "^Medical")) %>% 
+  group_by(Specialty, AdmissionType, year, month) %>%
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>%
+  ggplot(aes(x = month, y = num_admissions, colour = Specialty))+
+  geom_line()+
+  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+  facet_wrap(AdmissionType ~ year)
+```
+
+
+```{r}
+# number of admissions
+hb_specialty_ts %>%
+  # filter(!is.na(HBName)) %>% # uncomment to include location
+  filter(is.na(SpecialtyQF)) %>%
+  filter(!is.na(Specialty), # remover NAs
+         !str_detect(Specialty, "^Medical")) %>% 
+  group_by(Specialty, year) %>% 
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = num_admissions, colour = Specialty))+
+  geom_line()
+
+# percentage difference from 2018/2019
+hb_specialty_ts %>%
+  # filter(!is.na(HBName)) %>% # uncomment to include location
+  filter(is.na(SpecialtyQF)) %>% 
+  filter(!is.na(Specialty),  # remover NAs
+         !str_detect(Specialty, "^Medical")) %>% 
+  group_by(Specialty, year) %>% 
+  summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = percentage_diff, colour = Specialty))+
+  geom_line()
 ```
 
 <br>
@@ -160,7 +358,100 @@ head(hb_specialty)
 
 ```{r}
 head(hscp_agesex)
+
+hscp_agesex %>% 
+  filter(WeekEnding == 20200105,
+         HSCP == "S37000001") %>% 
+  summarise(count = sum(NumberAdmissions, na.rm = TRUE))
 ```
+
+```{r}
+hscp_agesex_ts <- hscp_agesex %>% 
+  mutate(year = year(ymd(WeekEnding)),
+         month = month(ymd(WeekEnding)),
+         .after = WeekEnding
+  ) %>% 
+  mutate(AgeGroup = case_when(AgeGroup == "Under 5" ~ "0 - 05",
+                              AgeGroup == "5 - 14" ~ "05 - 14",
+                              TRUE ~ AgeGroup)) %>%
+  mutate(pre_post_diff = NumberAdmissions - Average20182019) %>% 
+  left_join(hscp_names, by = "HSCP")
+```
+
+### Age
+
+Split by year (Weekly average number of admissions per year)
+
+```{r}
+# number of admissions-- MONTHLY CHECK FOR PATTERNS
+hscp_agesex_ts %>%
+  filter(is.na(AgeGroupQF)) %>%
+  group_by(AgeGroup, year, month) %>%
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>%
+  ggplot(aes(x = month, y = num_admissions, colour = AgeGroup))+
+  geom_line()+
+  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+  facet_wrap(~ year, nrow = 1)
+```
+
+
+```{r}
+# number of admissions
+hscp_agesex_ts %>%
+  # filter(!is.na(HSCPName)) %>% # uncomment to include location
+  filter(is.na(AgeGroupQF)) %>%
+  group_by(AgeGroup, year) %>% 
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = num_admissions, colour = AgeGroup))+
+  geom_line()
+
+# percentage difference from 2018/2019
+hscp_agesex_ts %>%
+  # filter(!is.na(HSCPName)) %>% # uncomment to include location
+  filter(is.na(AgeGroupQF)) %>% 
+  group_by(AgeGroup, year) %>% 
+  summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = percentage_diff, colour = AgeGroup))+
+  geom_line()
+```
+
+### Gender
+
+Split by year (Weekly average number of admissions per year)
+
+```{r}
+# number of admissions -- MONTHLY CHECK FOR PATTERNS
+hscp_agesex_ts %>%
+  filter(is.na(SexQF)) %>%
+  group_by(Sex, year, month) %>%
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>%
+  ggplot(aes(x = month, y = num_admissions, colour = Sex))+
+  geom_line()+
+  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+  facet_wrap(~ year, nrow = 1)
+```
+
+
+```{r}
+# number of admissions
+hscp_agesex_ts %>%
+  # filter(!is.na(HSCPName)) %>% # uncomment to include location
+  filter(is.na(SexQF)) %>%
+  group_by(Sex, year) %>% 
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = num_admissions, colour = Sex))+
+  geom_line()
+
+# percentage difference from 2018/2019
+hscp_agesex_ts %>%
+  # filter(!is.na(HSCPName)) %>% # uncomment to include location
+  filter(is.na(SexQF)) %>% 
+  group_by(Sex, year) %>% 
+  summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = percentage_diff, colour = Sex))+
+  geom_line()
+```
+
 
 <br>
 
@@ -178,6 +469,71 @@ file is empty
 
 ```{r}
 head(hscp_specialty)
+
+hscp_specialty %>% 
+  filter(WeekEnding == 20200105,
+         HSCP == "S37000001") %>% 
+  summarise(count = sum(NumberAdmissions, na.rm = TRUE))
+```
+
+```{r}
+hscp_specialty_ts <- hscp_specialty %>% 
+  mutate(year = year(ymd(WeekEnding)),
+         month = month(ymd(WeekEnding)),
+         .after = WeekEnding
+  ) %>% 
+  mutate(pre_post_diff = NumberAdmissions - Average20182019) %>% 
+  left_join(hscp_names, by = "HSCP")
+```
+
+
+```{r}
+# number of admissions-- MONTHLY CHECK FOR PATTERNS
+hscp_specialty_ts %>%
+  filter(is.na(SpecialtyQF)) %>%
+  group_by(Specialty, AdmissionType, year, month) %>%
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>%
+  ggplot(aes(x = month, y = num_admissions, colour = Specialty))+
+  geom_line()+
+  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+  facet_wrap(AdmissionType ~ year)
+
+# number of admissions-- MONTHLY CHECK FOR PATTERNS - remove generic specialty
+hscp_specialty_ts %>%
+  filter(is.na(SpecialtyQF)) %>%
+  filter(!is.na(Specialty),
+         !str_detect(Specialty, "^Medical")) %>% 
+  group_by(Specialty, AdmissionType, year, month) %>%
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>%
+  ggplot(aes(x = month, y = num_admissions, colour = Specialty))+
+  geom_line()+
+  scale_x_continuous(breaks = c(1, 3, 5, 7, 9, 11))+
+  facet_wrap(AdmissionType ~ year)
+```
+
+
+```{r}
+# number of admissions
+hscp_specialty_ts %>%
+  # filter(!is.na(HSCPName)) %>% # uncomment to include location
+  filter(is.na(SpecialtyQF)) %>%
+  filter(!is.na(Specialty), # remover NAs
+         !str_detect(Specialty, "^Medical")) %>% 
+  group_by(Specialty, year) %>% 
+  summarise(num_admissions = mean(NumberAdmissions, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = num_admissions, colour = Specialty))+
+  geom_line()
+
+# percentage difference from 2018/2019
+hscp_specialty_ts %>%
+  # filter(!is.na(HSCPName)) %>% # uncomment to include location
+  filter(is.na(SpecialtyQF)) %>% 
+  filter(!is.na(Specialty),  # remover NAs
+         !str_detect(Specialty, "^Medical")) %>% 
+  group_by(Specialty, year) %>% 
+  summarise(percentage_diff = mean(PercentVariation, na.rm = TRUE)) %>% 
+  ggplot(aes(x = year, y = percentage_diff, colour = Specialty))+
+  geom_line()
 ```
 
 <br>

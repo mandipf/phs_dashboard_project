@@ -49,7 +49,8 @@ ui <- fluidPage(
           )
         ),
         mainPanel(
-          plotOutput("home_plot", width = "90%")
+          br(),
+          plotOutput("home_plot", width = "100%")
         )
       )
     ),
@@ -95,6 +96,7 @@ ui <- fluidPage(
           )
         ),
         mainPanel(
+          br(),
           plotOutput("ae_plot", width = "90%")
         )
       )

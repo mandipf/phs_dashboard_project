@@ -37,21 +37,34 @@ server <- function(input, output) {
     #   need(filtered_data() != "",
     #        "No games found that meet your search criteria"),
     # )
+    ggplot(mtcars, aes(x=mpg, y=wt, fill = cyl)) + 
+      geom_col()+
+      my_theme()
   })
   
   output$ae_plot <- renderPlot({
+    ggplot(mtcars, aes(x=mpg, y=wt, fill = cyl)) + 
+      geom_point()
   })
   
   output$age_gender_plot <- renderPlot({
+    ggplot(mtcars, aes(x=mpg, y=wt, fill = cyl)) + 
+      geom_col()
   })
   
   output$simd_plot <- renderPlot({
+    ggplot(mtcars, aes(x=mpg, y=wt)) + 
+      geom_point()
   })
   
   output$specialty_plot <- renderPlot({
+    ggplot(mtcars, aes(x=mpg, y=wt)) + 
+      geom_col()
   })
   
   output$covid_plot <- renderPlot({
+    ggplot(mtcars, aes(x=mpg, y=wt)) + 
+      geom_point()
   })
   
   output$data_source_text <- renderText({

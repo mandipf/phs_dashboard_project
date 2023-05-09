@@ -1,24 +1,22 @@
-# libraries for app
+# LIBRARIES FOR APP
 library(tidyverse)
 library(bslib)
+library(here)
 
-# data for app
+# DATA FOR APP
 
 
-# plot styling
-phs_colours <- c("#3F3685", "#9B4393", "#0078D4", "#83BB26", "#948DA3",
-                 "#1E7F84", "#6B5C85", "#C73918")
+# PLOT STYLING
+source("R/plot_themes.R")
 
 # plot_colours <- c("critic_score" = colour_chart[1],
 #                   "user_score" = colour_chart[2],
 #                   "sales" = colour_chart[3])
 
-# main intermediate variables
-hb_choices <- sort(c("All", "Glasgow City and Other stuff", "L2", "L3", "L4"))
-hb_default <- "All"
 
 
-# recycled intermediate variables
+
+# INTERMEDIATE VARIABLES
 sidebarpanel_width = 3
 
 time_period_choices <- c("All", "Pre-Covid", "Post-Covid")
@@ -27,6 +25,11 @@ year_default_low <- 2018
 year_default_high <- 2023
 year_slider_low <- year_default_low
 year_slider_high <- year_default_high
+
+
+# main intermediate variables
+hb_choices <- sort(c("All", "Glasgow City and Other stuff", "L2", "L3", "L4"))
+hb_default <- "All"
 
 
 # a&e intermediate values

@@ -1,0 +1,42 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#Read in Data
+```{r}
+read_csv(here::here("data/clean_data/"))
+```
+
+## Number of Admissions 
+```{r}
+waiting_times_clean %>% 
+  filter(HBT == "Highland") %>% 
+  group_by(Year, HBT) %>%
+  summarise(no_admissions = sum(NumberOfAttendancesAggregate, na.rm = TRUE)) %>% 
+  ggplot(aes(x = Year, 
+             y = no_admissions, colour = HBT, group = HBT)) + 
+  geom_line(show.legend = FALSE) +
+  geom_point(shape = 21, size = 2) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+```
+
+## Number of Stays vs Discharge 
+
+```{r}
+waiting_times_clean %>% 
+  # filter(HBT == "Highland") %>% 
+  group_by(Year) %>%
+  summarise(no_stay = sum(DischargeDestinationAdmissionToSame, na.rm = TRUE), 
+            no_discharge = sum(DischargeDestinationResidence, na.rm = TRUE)) %>% 
+  ggplot(aes(x = Year)) + 
+  geom_line(aes(y= no_stay), group = 1, show.legend = FALSE) +
+  geom_point(aes(y= no_stay), shape = 21, size = 2) +
+  geom_line(aes(y= no_discharge, colour = "red"), group = 1, show.legend = FALSE) +
+  geom_point(aes(y= no_discharge), shape = 21, size = 2) +
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+  
+```
+
+

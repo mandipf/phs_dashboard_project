@@ -13,13 +13,13 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           width = sidebarpanel_width,
-          radioButtons(
-            inputId = "time_period",
-            label = "Time period:",
-            choices = time_period_choices,
-            inline = TRUE
-          ),
-          br(),
+          # radioButtons(
+          #   inputId = "time_period",
+          #   label = "Time period:",
+          #   choices = time_period_choices,
+          #   inline = TRUE
+          # ),
+          # br(),
           sliderInput(
             inputId = "year_input",
             label = "Year:",
@@ -50,7 +50,9 @@ ui <- fluidPage(
         ),
         mainPanel(
           br(),
-          plotOutput("home_plot", width = "100%")
+          plotOutput("home_plot_1", width = "100%"),
+          br(),
+          plotOutput("home_plot_2", width = "100%")
         )
       )
     ),
@@ -60,13 +62,13 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           width = sidebarpanel_width,
-          radioButtons(
-            inputId = "time_period",
-            label = "Time period:",
-            choices = time_period_choices,
-            inline = TRUE
-          ),
-          br(),
+          # radioButtons(
+          #   inputId = "time_period",
+          #   label = "Time period:",
+          #   choices = time_period_choices,
+          #   inline = TRUE
+          # ),
+          # br(),
           sliderInput(
             inputId = "year_input",
             label = "Year:",
@@ -97,7 +99,9 @@ ui <- fluidPage(
         ),
         mainPanel(
           br(),
-          plotOutput("ae_plot", width = "90%")
+          plotOutput("ae_plot_1", width = "100%"),
+          br(),
+          plotOutput("ae_plot_2", width = "100%")
         )
       )
     ),
@@ -107,13 +111,13 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           width = sidebarpanel_width,
-          radioButtons(
-            inputId = "time_period",
-            label = "Time period:",
-            choices = time_period_choices,
-            inline = TRUE
-          ),
-          br(),
+          # radioButtons(
+          #   inputId = "time_period",
+          #   label = "Time period:",
+          #   choices = time_period_choices,
+          #   inline = TRUE
+          # ),
+          # br(),
           sliderInput(
             inputId = "year_input",
             label = "Year:",
@@ -130,20 +134,23 @@ ui <- fluidPage(
             selected = age_default
           ),
           br(),
-          radioButtons(
-            inputId = "gender_input",
-            label = "Gender:",
-            choices = gender_choices,
-            inline = TRUE
-          ),
-          br(),
+          # radioButtons(
+          #   inputId = "gender_input",
+          #   label = "Gender:",
+          #   choices = gender_choices,
+          #   inline = TRUE
+          # ),
+          # br(),
           actionButton(
             inputId = "field_update",
             label = "Submit"
           )
         ),
         mainPanel(
-          plotOutput("age_gender_plot", width = "90%")
+          br(),
+          plotOutput("age_gender_plot_1", width = "100%"),
+          br(),
+          plotOutput("age_gender_plot_2", width = "100%")
         )
       )
     ),
@@ -153,13 +160,13 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           width = sidebarpanel_width,
-          radioButtons(
-            inputId = "time_period",
-            label = "Time period:",
-            choices = time_period_choices,
-            inline = TRUE
-          ),
-          br(),
+          # radioButtons(
+          #   inputId = "time_period",
+          #   label = "Time period:",
+          #   choices = time_period_choices,
+          #   inline = TRUE
+          # ),
+          # br(),
           sliderInput(
             inputId = "year_input",
             label = "Year:",
@@ -182,7 +189,10 @@ ui <- fluidPage(
           ),
         ),
         mainPanel(
-          plotOutput("simd_plot", width = "90%")
+          br(),
+          plotOutput("simd_plot_1", width = "100%"),
+          br(),
+          plotOutput("simd_plot_2", width = "100%")
         )
       )
     ),
@@ -192,13 +202,13 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           width = sidebarpanel_width,
-          radioButtons(
-            inputId = "time_period",
-            label = "Time period:",
-            choices = time_period_choices,
-            inline = TRUE
-          ),
-          br(),
+          # radioButtons(
+          #   inputId = "time_period",
+          #   label = "Time period:",
+          #   choices = time_period_choices,
+          #   inline = TRUE
+          # ),
+          # br(),
           sliderInput(
             inputId = "year_input",
             label = "Year:",
@@ -221,48 +231,51 @@ ui <- fluidPage(
           ),
         ),
         mainPanel(
-          plotOutput("specialty_plot", width = "90%")
+          br(),
+          plotOutput("specialty_plot_1", width = "100%"),
+          br(),
+          plotOutput("specialty_plot_2", width = "100%")
         )
       )
-    ),
-    # Effects of COVID-19 tab
-    tabPanel(
-      title = "Covid-19",
-      sidebarLayout(
-        sidebarPanel(
-          width = sidebarpanel_width,
-          radioButtons(
-            inputId = "time_period",
-            label = "Time period:",
-            choices = time_period_choices,
-            inline = TRUE
-          ),
-          br(),
-          sliderInput(
-            inputId = "year_input",
-            label = "Year:",
-            min = year_slider_low,
-            max = year_slider_high,
-            value = c(year_default_low, year_default_high),
-            sep = ""
-          ),
-          br(),
-          checkboxGroupInput(
-            inputId = "specialty_input",
-            label = "Specialty:",
-            choices = specialty_choices,
-            selected = specialty_default
-          ),
-          br(),
-          actionButton(
-            inputId = "field_update",
-            label = "Submit"
-          ),
-        ),
-        mainPanel(
-          plotOutput("covid_plot", width = "90%")
-        )
-      )
+    # ),
+    # # Effects of COVID-19 tab
+    # tabPanel(
+    #   title = "Covid-19",
+    #   sidebarLayout(
+    #     sidebarPanel(
+    #       width = sidebarpanel_width,
+    #       radioButtons(
+    #         inputId = "time_period",
+    #         label = "Time period:",
+    #         choices = time_period_choices,
+    #         inline = TRUE
+    #       ),
+    #       br(),
+    #       sliderInput(
+    #         inputId = "year_input",
+    #         label = "Year:",
+    #         min = year_slider_low,
+    #         max = year_slider_high,
+    #         value = c(year_default_low, year_default_high),
+    #         sep = ""
+    #       ),
+    #       br(),
+    #       checkboxGroupInput(
+    #         inputId = "specialty_input",
+    #         label = "Specialty:",
+    #         choices = specialty_choices,
+    #         selected = specialty_default
+    #       ),
+    #       br(),
+    #       actionButton(
+    #         inputId = "field_update",
+    #         label = "Submit"
+    #       ),
+    #     ),
+    #     mainPanel(
+    #       plotOutput("covid_plot", width = "90%")
+    #     )
+    #   )
     )
   ),
   

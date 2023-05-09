@@ -12,8 +12,8 @@ simd_clean <- read_csv("data/clean_data/simd_clean.csv")
 
 ```{r}
 simd_clean %>% 
-  filter(hb == "Greater Glasgow and Clyde",
-         simd == 2) %>% 
+  filter(hb == "The Golden Jubilee National Hospital",
+         simd %in% c(1, 2, 3, 4, 5)) %>% 
   group_by(quarter, simd) %>% 
   summarise(mean_episodes = mean(episodes, na.rm = TRUE)) %>% 
   ggplot(aes(x = quarter, y = mean_episodes, group = simd))+
@@ -27,7 +27,7 @@ simd_clean %>%
   annotate("text", x = "2020Q3", y = 15, label = "2020") +
   annotate("text", x = "2021Q3", y = 15, label = "2021") +
   annotate("text", x = "2022Q3", y = 15, label = "2022") +
-  annotate("text", x = "2023Q3", y = 70, label = "2023") +
+  annotate("text", x = "2023Q3", y = 15, label = "2023") +
   labs(x = "Quarter/Year",
        y = "Mean number of episodes")
 ```
@@ -52,7 +52,7 @@ simd_clean %>%
   annotate("text", x = "2020Q3", y = 15, label = "2020") +
   annotate("text", x = "2021Q3", y = 15, label = "2021") +
   annotate("text", x = "2022Q3", y = 15, label = "2022") +
-  annotate("text", x = "2023Q3", y = 70, label = "2023") +
+  annotate("text", x = "2023Q3", y = 15, label = "2023") +
   labs(x = "Quarter/Year",
        y = "Mean number of episodes")
 ```

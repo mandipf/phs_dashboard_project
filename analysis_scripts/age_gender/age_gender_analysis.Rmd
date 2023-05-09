@@ -1,0 +1,67 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Analysis script for Age/Gender - PHS scotland group project
+
+```{r}
+age_sex_clean <- read_csv("data/clean_data/age_sex_clean.csv")
+```
+## Number of episodes
+
+```{r}
+age_sex_clean %>% 
+  mutate(pre_covid = case_when(str_detect(quarter, "^201") ~ "pre_covid",
+                               TRUE ~ "post_covid")) %>% 
+  filter(hb == "Greater Glasgow and Clyde",
+         age == "60-69 years") %>% 
+  #mutate(), .by = pre_covid) %>% 
+  group_by(quarter, sex) %>% 
+  summarise(mean_episodes = mean(episodes),
+            mean_covid = mean(episodes, na.rm = TRUE)) %>% 
+  ggplot(aes(x = quarter, y = mean_episodes, group = sex))+
+  geom_point(aes(color = sex))+
+  geom_line(aes(color = sex))+
+  geom_hline(aes(yintercept = mean(mean_covid)), linetype = "dotted")+
+  geom_ribbon(aes(y = mean(mean_covid), ymin = mean(mean_covid) - sd(mean_covid), ymax = mean(mean_covid) + sd(mean_covid)), alpha = 0.1) +
+  geom_vline(xintercept = c("2018Q1", "2019Q1", "2020Q1", "2021Q1", "2022Q1", "2023Q" ), linetype = 'dashed') +
+  annotate("text", x = "2017Q3", y = 15, label = "2017") +
+  annotate("text", x = "2018Q3", y = 15, label = "2018") +
+  annotate("text", x = "2019Q3", y = 15, label = "2019") +
+  annotate("text", x = "2020Q3", y = 15, label = "2020") +
+  annotate("text", x = "2021Q3", y = 15, label = "2021") +
+  annotate("text", x = "2022Q3", y = 15, label = "2022") +
+  annotate("text", x = "2023Q3", y = 70, label = "2023") +
+  labs(x = "Quarter/Year",
+       y = "Mean number of episodes")
+```
+### Length of stay
+
+```{r}
+age_sex_clean %>% 
+  mutate(pre_covid = case_when(str_detect(quarter, "^201") ~ "pre_covid",
+                               TRUE ~ "post_covid")) %>% 
+  filter(hb == "Greater Glasgow and Clyde",
+         age == "60-69 years") %>% 
+  #mutate(), .by = pre_covid) %>% 
+  group_by(quarter, sex) %>% 
+  summarise(mean_length_stay = mean(length_of_stay),
+            mean_covid = mean(length_of_stay, na.rm = TRUE)) %>% 
+  ggplot(aes(x = quarter, y = mean_length_stay, group = sex))+
+  geom_point(aes(color = sex))+
+  geom_line(aes(color = sex))+
+  geom_hline(aes(yintercept = mean(mean_covid)), linetype = "dotted")+
+  geom_ribbon(aes(y = mean(mean_covid), ymin = mean(mean_covid) - sd(mean_covid), ymax = mean(mean_covid) + sd(mean_covid)), alpha = 0.2) +
+  geom_vline(xintercept = c("2018Q1", "2019Q1", "2020Q1", "2021Q1", "2022Q1", "2023Q" ), linetype = 'dashed') +
+  annotate("text", x = "2017Q3", y = 15, label = "2017") +
+  annotate("text", x = "2018Q3", y = 15, label = "2018") +
+  annotate("text", x = "2019Q3", y = 15, label = "2019") +
+  annotate("text", x = "2020Q3", y = 15, label = "2020") +
+  annotate("text", x = "2021Q3", y = 15, label = "2021") +
+  annotate("text", x = "2022Q3", y = 15, label = "2022") +
+  annotate("text", x = "2023Q3", y = 70, label = "2023") +
+  labs(x = "Quarter/Year",
+       y = "Mean length of stay")
+```
+

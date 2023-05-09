@@ -1,0 +1,61 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Analysis script for deprivation index - PHS scotland group project
+
+```{r}
+simd_clean <- read_csv("data/clean_data/simd_clean.csv")
+```
+## Number of episodes by simd
+
+```{r}
+simd_clean %>% 
+  filter(hb == "Greater Glasgow and Clyde",
+         simd == 2) %>% 
+  group_by(quarter, simd) %>% 
+  summarise(mean_episodes = mean(episodes, na.rm = TRUE)) %>% 
+  ggplot(aes(x = quarter, y = mean_episodes, group = simd))+
+  geom_point(aes(colour = simd))+
+  geom_line(aes(colour = simd))+
+  geom_hline(aes(yintercept = mean(mean_episodes)), linetype = "dotted")+
+  geom_vline(xintercept = c("2018Q1", "2019Q1", "2020Q1", "2021Q1", "2022Q1", "2023Q" ), linetype = 'dashed') +
+  annotate("text", x = "2017Q3", y = 15, label = "2017") +
+  annotate("text", x = "2018Q3", y = 15, label = "2018") +
+  annotate("text", x = "2019Q3", y = 15, label = "2019") +
+  annotate("text", x = "2020Q3", y = 15, label = "2020") +
+  annotate("text", x = "2021Q3", y = 15, label = "2021") +
+  annotate("text", x = "2022Q3", y = 15, label = "2022") +
+  annotate("text", x = "2023Q3", y = 70, label = "2023") +
+  labs(x = "Quarter/Year",
+       y = "Mean number of episodes")
+```
+
+
+## Length of episodes
+
+```{r}
+simd_clean %>% 
+  filter(hb == "Greater Glasgow and Clyde",
+         simd == 2) %>% 
+  group_by(quarter, simd) %>% 
+  summarise(mean_length_of_stay = mean(length_of_stay, na.rm = TRUE)) %>% 
+  ggplot(aes(x = quarter, y = mean_length_of_stay, group = simd))+
+  geom_point(aes(colour = simd))+
+  geom_line(aes(colour = simd))+
+  geom_hline(aes(yintercept = mean(mean_length_of_stay)), linetype = "dotted")+
+  geom_vline(xintercept = c("2018Q1", "2019Q1", "2020Q1", "2021Q1", "2022Q1", "2023Q" ), linetype = 'dashed') +
+  annotate("text", x = "2017Q3", y = 15, label = "2017") +
+  annotate("text", x = "2018Q3", y = 15, label = "2018") +
+  annotate("text", x = "2019Q3", y = 15, label = "2019") +
+  annotate("text", x = "2020Q3", y = 15, label = "2020") +
+  annotate("text", x = "2021Q3", y = 15, label = "2021") +
+  annotate("text", x = "2022Q3", y = 15, label = "2022") +
+  annotate("text", x = "2023Q3", y = 70, label = "2023") +
+  labs(x = "Quarter/Year",
+       y = "Mean number of episodes")
+```
+
+
+

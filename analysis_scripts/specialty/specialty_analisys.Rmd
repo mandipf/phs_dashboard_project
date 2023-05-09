@@ -13,27 +13,14 @@ library(scales)
 ```
 
 #plot for mean of episodes
-```{r}
-top_specialty_mean_episodes <- read_csv("data/clean_data/specialty_mean_episodes.csv") 
 
-top_specialty_mean_episodes %>% 
-  ggplot(aes(x=quarter, y=mean))+
-  geom_line(aes(group=1))+
-  facet_grid(specialty_name_top ~., switch = "y", scales="free_y")+
- theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1), 
-    strip.text.y.left = element_text(angle = 0))+
-  labs(x = "Quarter/Year",
-       y = "Mean number of episodes", 
-       title="Mean number of episodes per quarter per year")+
-geom_vline(xintercept = c("2018Q1", "2019Q1", "2020Q1", "2021Q1", "2022Q1", "2023Q" ), linetype = 'dashed')
-```
 #option 2 without facet_grid
 ```{r}
-top_specialty_mean_episodes <- read_csv("data/clean_data/specialty_mean_episodes.csv") 
+top_specialty_mean_episodes <- read_csv("../../data/clean_data/specialty_mean_episodes.csv") 
 
 top_specialty_mean_episodes %>% 
   ggplot(aes(x=quarter, y=mean, colour=specialty_name_top, group=specialty_name_top))+
-  geom_line()+
+  geom_line(size=1)+
  theme(axis.text.x = element_text(angle = 90, hjust=1, size=5))+
   labs(x = "Quarter/Year",
        y = "Mean number of episodes", 
@@ -51,33 +38,16 @@ annotate("text", x = "2017Q3", y = 15, label = "2017") +
 
 #plot for mean of length of spell
 ```{r}
-top_specialty_mean_lengthofspell <- read_csv("data/clean_data/specialty_mean_lengthofspell.csv") 
 
-top_specialty_mean_lengthofspell %>% 
-  ggplot(aes(x=quarter, y=mean))+
-  geom_line(aes(group=1))+
-  geom_smooth()+
-    facet_grid(specialty_name_top ~., switch="y", scales="free_y")+
- theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1),
-    strip.text.y.left = element_text(angle = 0))+
-  labs(x = "Quarter/Year",
-       y = "Mean number of episodes", 
-       title="Mean number of episodes per quarter per year")+
-  geom_vline(xintercept = c("2018Q1", "2019Q1", "2020Q1", "2021Q1", "2022Q1", "2023Q" ), linetype = 'dashed')
-```
-
-#option 2 without facet_grid
-```{r}
-
-top_specialty_mean_lengthofspell <- read_csv("data/clean_data/specialty_mean_lengthofspell.csv") 
+top_specialty_mean_lengthofspell <- read_csv("../../data/clean_data/specialty_mean_lengthofspell.csv") 
 
 top_specialty_mean_lengthofspell %>% 
   ggplot(aes(x=quarter, y=mean, colour=specialty_name_top, group=specialty_name_top))+
-  geom_line()+
+  geom_line(size=1)+
  theme(axis.text.x = element_text(angle = 90, hjust=1, size=5))+
   labs(x = "Quarter/Year",
-       y = "Mean number of episodes", 
-       title="Mean number of episodes per quarter per year")+
+       y = "Mean of length of spell", 
+       title="Mean of length of spell per quarter per year")+
   geom_vline(xintercept = c("2018Q1", "2019Q1", "2020Q1", "2021Q1", "2022Q1", "2023Q" ), linetype = 'dashed')+
 annotate("text", x = "2017Q3", y = 15, label = "2017") +
   annotate("text", x = "2018Q3", y = 15, label = "2018") +

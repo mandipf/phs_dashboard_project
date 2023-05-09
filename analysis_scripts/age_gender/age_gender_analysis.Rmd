@@ -32,7 +32,7 @@ age_sex_clean %>%
   annotate("text", x = "2020Q3", y = 15, label = "2020") +
   annotate("text", x = "2021Q3", y = 15, label = "2021") +
   annotate("text", x = "2022Q3", y = 15, label = "2022") +
-  annotate("text", x = "2023Q3", y = 70, label = "2023") +
+  annotate("text", x = "2023Q3", y = 15, label = "2023") +
   labs(x = "Quarter/Year",
        y = "Mean number of episodes")
 ```
@@ -60,7 +60,7 @@ age_sex_clean %>%
   annotate("text", x = "2020Q3", y = 15, label = "2020") +
   annotate("text", x = "2021Q3", y = 15, label = "2021") +
   annotate("text", x = "2022Q3", y = 15, label = "2022") +
-  annotate("text", x = "2023Q3", y = 70, label = "2023") +
+  annotate("text", x = "2023Q3", y = 15, label = "2023") +
   labs(x = "Quarter/Year",
        y = "Mean length of stay")
 ```

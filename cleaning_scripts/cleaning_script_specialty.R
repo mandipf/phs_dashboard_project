@@ -7,10 +7,10 @@ library(forcats)
 library(scales)
 
 #upload the raw data
-specialty <- read.csv("raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_and_specialty.csv") %>% 
+specialty <- read.csv("data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_and_specialty.csv") %>% 
   janitor::clean_names()
 
-board_codes <- read_csv("raw_data/special-health-boards_19022021.csv") %>% 
+board_codes <- read_csv("data/raw_data/special-health-boards_19022021.csv") %>% 
   janitor::clean_names() %>% 
   rename(hb = shb)
 #add names of boards to the data

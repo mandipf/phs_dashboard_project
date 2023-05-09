@@ -1,0 +1,29 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+#plot for mean of episodes
+```{r}
+top_specialty_mean_episodes <- read_csv("data/clean_data/specialty_mean_episodes.csv") 
+
+top_specialty_mean_episodes %>% 
+  ggplot(aes(x=quarter, y=mean))+
+  geom_line(aes(group=1))+
+  geom_smooth()+
+  facet_grid(specialty_name_top ~., switch = "y", scales="free_y")+
+ theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1), 
+    strip.text.y.left = element_text(angle = 0))
+```
+
+#plot for mean of length of spell
+```{r}
+top_specialty_mean_lengthofspell <- read_csv("data/clean_data/specialty_mean_lengthofspell.csv") 
+
+top_specialty_mean_lengthofspell %>% 
+  ggplot(aes(x=quarter, y=mean))+
+  geom_line(aes(group=1))+
+  geom_smooth()+
+  facet_grid(specialty_name_top ~., switch = "y", scales="free_y")+
+ theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1), 
+    strip.text.y.left = element_text(angle = 0))
+```

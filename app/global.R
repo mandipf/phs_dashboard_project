@@ -5,7 +5,8 @@ library(here)
 
 # DATA FOR APP
 
-ae_df <- read_csv(here("data/clean_data/datawaiting_times_clean.csv"))
+# ae_df <- read_csv(here("data/clean_data/datawaiting_times_clean.csv"))
+ae_df <- read_csv(here("data/clean_datawaiting_times_clean.csv"))
 age_sex_df <- read_csv(here("data/clean_data/age_sex_clean.csv"))
 hb_names_df <- read_csv(here("data/clean_data/health_board_names.csv"))
 # home_hb_admissions_df <- read_csv(here("data/clean_data/ "))

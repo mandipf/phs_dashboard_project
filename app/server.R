@@ -1,5 +1,6 @@
 server <- function(input, output) {
   
+  #####
   # HOME TAB
   home_tab_1 <- eventReactive(
     eventExpr = input$update_home,
@@ -27,9 +28,46 @@ server <- function(input, output) {
   #                 .by = c(Quarter, HB))
     })
   
+  output$home_plot_1 <- renderPlot({
+    validate(
+      need(nrow(home_tab_1()) != 0,
+           "No data found that meet your search criteria"),
+    )
+    home_tab_1() %>% 
+      ggplot(aes(x = Quarter, y = no_episodes, group = HB, colour = HB)) + 
+      geom_line() +
+      geom_point(shape = 21, size = 2) + 
+      labs(title = "Number of Episodes 2017 - 2023",
+           x = "Health Board", 
+           y = "Number of Episodes")+
+      scale_colour_manual(values = phs_colours)+
+      annual_marker()+
+      my_theme()
+  })
   
+  output$home_plot_2 <- renderPlot({
+    validate(
+      need(nrow(home_tab_2()) != 0,
+           "No data found that meet your search criteria"),
+    )
+    home_tab_2() %>% 
+      ggplot(aes(x = Quarter, y = avg_length_of_stay, group = HB, colour = HB)) + 
+      geom_line() +
+      geom_point(shape = 21, size = 2) + 
+      labs(title = "Average Length of Stay 2017 - 2023",
+           x = "Health Board", 
+           y = "Average Length of Stay")+
+      scale_colour_manual(values = phs_colours)+
+      annual_marker()+
+      my_theme()
+  })
+  
+  
+  
+  
+  #####
   # A&E TAB
-  ae_tab_1 <- eventReactive(
+  ae_tab_df <- eventReactive(
     eventExpr = input$update_ae,
     valueExpr = {
       if (input$hb_input_ae != "All"){
@@ -39,28 +77,65 @@ server <- function(input, output) {
       ae_df %>% 
         #group_by(Year, HBT) %>%
         summarise(no_admissions = sum(NumberOfAttendancesAggregate, na.rm = TRUE),
+                  no_stay = sum(DischargeDestinationAdmissionToSame, na.rm = TRUE), 
+                  no_discharge = sum(DischargeDestinationResidence, na.rm = TRUE),
                   .by = Year)
       # summarise(no_admissions = sum(NumberOfAttendancesAggregate, na.rm = TRUE),
       #           .by = c(Year, HBT))
     })
   
-  ae_tab_2 <- eventReactive(
-    eventExpr = input$update_ae,
-    valueExpr = {
-      if (input$hb_input_ae != "All"){
-        ae_df <- ae_df %>%
-          filter(HBT == input$hb_input_ae)
-      }
-      ae_df %>% 
-        # filter(HBT == "Highland") %>% 
-        # group_by(Year) %>%
-        summarise(no_stay = sum(DischargeDestinationAdmissionToSame, na.rm = TRUE), 
-                  no_discharge = sum(DischargeDestinationResidence, na.rm = TRUE),
-                  .by = Year)
-      
-    })
+  # ae_tab_2 <- eventReactive(
+  #   eventExpr = input$update_ae,
+  #   valueExpr = {
+  #     if (input$hb_input_ae != "All"){
+  #       ae_df <- ae_df %>%
+  #         filter(HBT == input$hb_input_ae)
+  #     }
+  #     ae_df %>% 
+  #       # filter(HBT == "Highland") %>% 
+  #       # group_by(Year) %>%
+  #       summarise(no_stay = sum(DischargeDestinationAdmissionToSame, na.rm = TRUE), 
+  #                 no_discharge = sum(DischargeDestinationResidence, na.rm = TRUE),
+  #                 .by = Year)
+  #     
+  #   })
+  
+  output$ae_plot_1 <- renderPlot({
+    validate(
+      need(nrow(ae_tab_df()) != 0,
+           "No data found that meet your search criteria"),
+    )
+    ae_tab_df() %>% 
+      # ggplot(aes(x = Year, y = no_admissions,
+      #            colour = HBT, group = HBT)) + 
+      # geom_line() +
+      ggplot(aes(x = Year, y = no_admissions)) + 
+      geom_line(group = 1) +
+      geom_point(shape = 21, size = 2) +
+      scale_colour_manual(values = phs_colours)+
+      my_theme()
+  })
+  
+  output$ae_plot_2 <- renderPlot({
+    validate(
+      need(nrow(ae_tab_df()) != 0,
+           "No data found that meet your search criteria"),
+    )
+    ae_tab_df() %>% 
+      ggplot(aes(x = Year)) + 
+      geom_line(aes(y= no_stay), group = 1, colour = "#3F3685") +
+      geom_point(aes(y= no_stay), shape = 21, size = 2) +
+      geom_line(aes(y= no_discharge), group = 1, colour = "#9B4393") +
+      geom_point(aes(y= no_discharge), shape = 21, size = 2) +
+      scale_y_continuous(labels = scales::comma) +
+      scale_colour_manual(values = phs_colours)+
+      my_theme()
+  })
   
   
+  
+  
+  #####  
   # AGE_SEX TAB
   age_gender_tab_1 <- eventReactive(
     eventExpr = input$update_age_sex,
@@ -97,142 +172,6 @@ server <- function(input, output) {
                   .by = c(quarter, sex))
     })
   
-  
-  # SIMD TAB
-  simd_tab_1 <- eventReactive(
-    eventExpr = input$update_simd,
-    valueExpr = {
-      if (input$hb_input_simd != "All"){
-        simd_df <- simd_df %>% 
-          filter(hb == input$hb_input_simd)
-      }
-      simd_df %>% 
-        filter(simd %in% input$simd_input) %>% 
-        summarise(mean_episodes = mean(episodes, na.rm = TRUE),
-                  .by = c(quarter, simd))
-    })
-  
-  simd_tab_2 <- eventReactive(
-    eventExpr = input$update_simd,
-    valueExpr = {
-      if (input$hb_input_simd != "All"){
-        simd_df <- simd_df %>% 
-          filter(hb == input$hb_input_simd)
-      }
-      simd_df %>%
-        filter(simd %in% input$simd_input) %>% 
-        summarise(mean_length_of_stay = mean(length_of_stay, na.rm = TRUE),
-                  .by = c(quarter, simd))
-    })
-  
-  
-  # SPECIALTY TAB
-  speciality_tab_1 <- eventReactive(
-    eventExpr = input$update_specialty,
-    valueExpr = {
-      
-      # if (hb_input_specialty != "All"){
-      #   specialty_episode <- specialty_episode %>% 
-      #     filter(hb == hb_input_specialty)
-      # }
-      
-      specialty_episode %>%
-        filter(specialty_name_top %in% input$specialty_input)
-    })
-  
-  speciality_tab_2 <- eventReactive(
-    eventExpr = input$update_specialty,
-    valueExpr = {
-      
-      # if (hb_input_specialty != "All"){
-      #   specialty_spell <- specialty_spell %>% 
-      #     filter(hb == hb_input_specialty)
-      # }
-      
-      specialty_spell %>% 
-        filter(specialty_name_top %in% input$specialty_input)
-    })
-  
-  
-  # COVID TAB
-  # covid_tab_1 <- eventReactive(
-  #   eventExpr = input$update,
-  #   valueExpr = {
-  #   })
-  # 
-  # covid_tab_2 <- eventReactive(
-  #   eventExpr = input$update,
-  #   valueExpr = {
-  #   })
- 
-  
-  # PLOTS
-  output$home_plot_1 <- renderPlot({
-    validate(
-      need(nrow(home_tab_1()) != 0,
-           "No data found that meet your search criteria"),
-    )
-    home_tab_1() %>% 
-      ggplot(aes(x = Quarter, y = no_episodes, group = HB, colour = HB)) + 
-      geom_line() +
-      geom_point(shape = 21, size = 2) + 
-      labs(title = "Number of Episodes 2017 - 2023",
-           x = "Health Board", 
-           y = "Number of Episodes")+
-      scale_colour_manual(values = phs_colours)+
-      annual_marker()+
-      my_theme()
-  })
-  
-  output$home_plot_2 <- renderPlot({
-    validate(
-      need(nrow(home_tab_2()) != 0,
-           "No data found that meet your search criteria"),
-    )
-    home_tab_2() %>% 
-      ggplot(aes(x = Quarter, y = avg_length_of_stay, group = HB, colour = HB)) + 
-      geom_line() +
-      geom_point(shape = 21, size = 2) + 
-      labs(title = "Average Length of Stay 2017 - 2023",
-           x = "Health Board", 
-           y = "Average Length of Stay")+
-      scale_colour_manual(values = phs_colours)+
-      annual_marker()+
-      my_theme()
-  })
-  
-  output$ae_plot_1 <- renderPlot({
-    validate(
-      need(nrow(ae_tab_1()) != 0,
-           "No data found that meet your search criteria"),
-    )
-    ae_tab_1() %>% 
-      # ggplot(aes(x = Year, y = no_admissions,
-      #            colour = HBT, group = HBT)) + 
-      # geom_line() +
-      ggplot(aes(x = Year, y = no_admissions)) + 
-      geom_line(group = 1) +
-      geom_point(shape = 21, size = 2) +
-      scale_colour_manual(values = phs_colours)+
-      my_theme()
-  })
-  
-  output$ae_plot_2 <- renderPlot({
-    validate(
-      need(nrow(ae_tab_2()) != 0,
-           "No data found that meet your search criteria"),
-    )
-    ae_tab_2() %>% 
-    ggplot(aes(x = Year)) + 
-      geom_line(aes(y= no_stay), group = 1, colour = "#3F3685") +
-      geom_point(aes(y= no_stay), shape = 21, size = 2) +
-      geom_line(aes(y= no_discharge), group = 1, colour = "#9B4393") +
-      geom_point(aes(y= no_discharge), shape = 21, size = 2) +
-      scale_y_continuous(labels = scales::comma) +
-      scale_colour_manual(values = phs_colours)+
-      my_theme()
-  })
-  
   output$age_gender_plot_1 <- renderPlot({
     validate(
       need(nrow(age_gender_tab_1()) != 0,
@@ -266,12 +205,44 @@ server <- function(input, output) {
       my_theme()
   })
   
+  
+  
+  
+  #####
+  # SIMD TAB
+  simd_tab_df <- eventReactive(
+    eventExpr = input$update_simd,
+    valueExpr = {
+      if (input$hb_input_simd != "All"){
+        simd_df <- simd_df %>% 
+          filter(hb == input$hb_input_simd)
+      }
+      simd_df %>% 
+        filter(simd %in% input$simd_input) %>% 
+        summarise(mean_episodes = mean(episodes, na.rm = TRUE),
+                  mean_length_of_stay = mean(length_of_stay, na.rm = TRUE),
+                  .by = c(quarter, simd))
+    })
+  
+  # simd_tab_2 <- eventReactive(
+  #   eventExpr = input$update_simd,
+  #   valueExpr = {
+  #     if (input$hb_input_simd != "All"){
+  #       simd_df <- simd_df %>% 
+  #         filter(hb == input$hb_input_simd)
+  #     }
+  #     simd_df %>%
+  #       filter(simd %in% input$simd_input) %>% 
+  #       summarise(mean_length_of_stay = mean(length_of_stay, na.rm = TRUE),
+  #                 .by = c(quarter, simd))
+  #   })
+  
   output$simd_plot_1 <- renderPlot({
     validate(
-      need(nrow(simd_tab_1()) != 0,
+      need(nrow(simd_tab_df()) != 0,
            "No data found that meet your search criteria"),
     )
-    simd_tab_1() %>% 
+    simd_tab_df() %>% 
       ggplot(aes(x = quarter, y = mean_episodes,
                  group = as.character(simd), colour = as.character(simd)))+
       geom_point()+
@@ -284,10 +255,10 @@ server <- function(input, output) {
   
   output$simd_plot_2 <- renderPlot({
     validate(
-      need(nrow(simd_tab_2()) != 0,
+      need(nrow(simd_tab_df()) != 0,
            "No data found that meet your search criteria"),
     )
-    simd_tab_2() %>%
+    simd_tab_df() %>%
       ggplot(aes(x = quarter, y = mean_length_of_stay,
                  group = as.character(simd), colour = as.character(simd)))+
       geom_point()+
@@ -299,6 +270,37 @@ server <- function(input, output) {
       annual_marker()+
       my_theme()
   })
+  
+  
+  
+  
+  #####
+  # SPECIALTY TAB
+  speciality_tab_1 <- eventReactive(
+    eventExpr = input$update_specialty,
+    valueExpr = {
+      
+      # if (hb_input_specialty != "All"){
+      #   specialty_episode <- specialty_episode %>% 
+      #     filter(hb == hb_input_specialty)
+      # }
+      
+      specialty_episode %>%
+        filter(specialty_name_top %in% input$specialty_input)
+    })
+  
+  speciality_tab_2 <- eventReactive(
+    eventExpr = input$update_specialty,
+    valueExpr = {
+      
+      # if (hb_input_specialty != "All"){
+      #   specialty_spell <- specialty_spell %>% 
+      #     filter(hb == hb_input_specialty)
+      # }
+      
+      specialty_spell %>% 
+        filter(specialty_name_top %in% input$specialty_input)
+    })
   
   output$specialty_plot_1 <- renderPlot({
     validate(
@@ -336,11 +338,32 @@ server <- function(input, output) {
       my_theme()
   })
   
+  
+  
+  
+  #####  
+  # COVID TAB
+  # covid_tab_1 <- eventReactive(
+  #   eventExpr = input$update,
+  #   valueExpr = {
+  #   })
+  # 
+  # covid_tab_2 <- eventReactive(
+  #   eventExpr = input$update,
+  #   valueExpr = {
+  #   })
+  #   #  
+  #  
   # output$covid_plot <- renderPlot({
   #   ggplot(mtcars, aes(x=mpg, y=wt)) + 
   #     geom_point()
   # })
   
+  
+  
+  
+  #####
+  # ALL TABS
   output$data_source_text <- renderText({
     "Data Source: https://www.opendata.nhs.scot/"
   })

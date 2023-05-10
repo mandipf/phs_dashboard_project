@@ -23,17 +23,6 @@ my_theme <- function() {
   )
 }
 
-# annual_marker <- function(){
-#   list(geom_vline(xintercept = c("2018Q1", "2019Q1", "2020Q1", "2021Q1", "2022Q1", "2023Q" ), linetype = 'dashed'),
-#        annotate("text", x = "2017Q3", y = 15, label = "2017"),
-#        annotate("text", x = "2018Q3", y = 15, label = "2018"),
-#        annotate("text", x = "2019Q3", y = 15, label = "2019"),
-#        annotate("text", x = "2020Q3", y = 15, label = "2020"),
-#        annotate("text", x = "2021Q3", y = 15, label = "2021"),
-#        annotate("text", x = "2022Q3", y = 15, label = "2022")
-#   )
-# }
-
 annual_marker <- function(){
   list(geom_vline(xintercept = c("2018Q1", "2019Q1", "2020Q1", "2021Q1", "2022Q1", "2023Q" ), linetype = 'dashed'),
        scale_x_discrete(breaks = c("2017Q3", "2018Q3", "2019Q3", "2020Q3",

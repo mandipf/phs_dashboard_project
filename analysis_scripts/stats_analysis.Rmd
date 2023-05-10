@@ -264,6 +264,12 @@ ae_winter_covid <- a_e_clean_winter %>%
                             TRUE ~ "post_covid"))
 ```
 
+```{r}
+ae_winter_precovid <- ae_winter_covid %>% 
+  filter(covid == "pre_covid")
+```
+
+
 
 ```{r}
 ae_winter_precovid %>% 
@@ -276,8 +282,7 @@ ae_winter_precovid %>%
 ## Step 3: Calculate observed stat (mean admissions pre-covid)
 
 ```{r}
-obs_stat_precovid <- ae_winter_covid%>% 
-  filter(covid == "pre_covid") %>% 
+obs_stat_precovid <- ae_winter_precovid %>% 
   specify(response = NumberOfAttendancesAggregate, explanatory = winter) %>% 
   calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
 
@@ -319,10 +324,14 @@ H1: mean(winter admissions post-covid) > mean(summer admissions post-covid)
 $$H_1:  \mu_{\textrm{winter admissions post-covid}} -  \mu_{\textrm{rest of year admissions post-covid}}\ > 0$$
 ## Step 2: Data wrangling and quick explore
 
+```{r}
+ae_winter_postcovid <- ae_winter_covid%>% 
+  filter(covid == "post_covid")
+```
+
 
 ```{r}
-ae_winter_covid %>% 
-  filter(covid == "post_covid") %>% 
+ae_winter_postcovid %>% 
   group_by(winter) %>% 
   summarise(mean_admissions = mean(NumberOfAttendancesAggregate),
             mean_discharge_home = mean(DischargeDestinationResidence, na.rm = TRUE),
@@ -331,8 +340,7 @@ ae_winter_covid %>%
 ##Step 3: Calculate observed stat
 
 ```{r}
-obs_stat_postcovid <- ae_winter_covid%>% 
-  filter(covid == "post_covid") %>% 
+obs_stat_postcovid <- ae_winter_postcovid%>% 
   specify(response = NumberOfAttendancesAggregate, explanatory = winter) %>% 
   calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
 
@@ -341,7 +349,7 @@ obs_stat_postcovid
 
 ## Step4:  Generate null distribution and visualise
 ```{r}
-null_dist_postcovid <- ae_winter_covid %>% 
+null_dist_postcovid <- ae_winter_postcovid %>% 
   specify(response = NumberOfAttendancesAggregate, explanatory = winter) %>% 
   hypothesise(null = "independence") %>% 
   generate(reps = 1000, type = "permute") %>% 

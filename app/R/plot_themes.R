@@ -1,7 +1,7 @@
 phs_colours <- c("#3F3685", "#9B4393", "#0078D4", "#83BB26", "#948DA3",
                  "#1E7F84", "#6B5C85", "#C73918", "#655E9D", "#AF69A9",
                  "#3393DD", "#9CC951", "#A9A4B5", "#4B999D", "#897D9D",
-                 "#D26146", "blue", "red")
+                 "#D26146", "#9F9BC2", "#CDA1C9", "#80BCEA", "#C1DD93")
 
 my_theme <- function() {
   theme(
@@ -11,8 +11,8 @@ my_theme <- function() {
     panel.grid.major.y = element_line(colour = "lightgrey", linewidth = 0.2),
     panel.grid.minor = element_blank(),
     text = element_text(size = 16),
-    plot.title = element_text(size = 18, hjust = 0.5),
-    plot.subtitle = element_text(size = 14, hjust = 0.5),
+    plot.title = element_text(size = 22, hjust = 0.5),
+    plot.subtitle = element_text(size = 18, hjust = 0.5),
     plot.caption = element_text(size = 10, hjust = 0.5),
     axis.title = element_text(size = 18),
     axis.text.y = element_text(size = 16),

@@ -1,6 +1,4 @@
 ui <- fluidPage(
-  #theme = bs_theme(bootswatch = "cerulean"),
-  #theme = bs_theme(bootswatch = "vapor"),
   theme = bs_theme(bootswatch = "pulse"),
   fluidRow(
     column(
@@ -12,9 +10,9 @@ ui <- fluidPage(
       width = (12 - sidebarpanel_width),
       offset = 0,
       titlePanel(title = h1("Effects of Covid-19 on hospital admissions in Scotland",
-                          align = "center"),
-               windowTitle = "Effects of CV-19 on hospital admissions"),
-  )
+                            align = "center"),
+                 windowTitle = "Effects of CV-19 on hospital admissions"),
+    )
   ),
   br(),
   
@@ -42,6 +40,7 @@ ui <- fluidPage(
             inputId = "update_home",
             label = "Submit"
           ),
+          br(),
           radioButtons(
             inputId = "plot_selector",
             label = "Admissions plot type:",
@@ -51,6 +50,7 @@ ui <- fluidPage(
         mainPanel(
           br(),
           plotOutput("home_plot_1", width = "100%"),
+          br(),
           br(),
           plotOutput("home_plot_2", width = "100%")
         )
@@ -83,6 +83,7 @@ ui <- fluidPage(
         mainPanel(
           br(),
           plotOutput("ae_plot_1", width = "100%"),
+          br(),
           br(),
           plotOutput("ae_plot_2", width = "100%")
         )
@@ -129,6 +130,7 @@ ui <- fluidPage(
           br(),
           plotOutput("age_gender_plot_1", width = "100%"),
           br(),
+          br(),
           plotOutput("age_gender_plot_2", width = "100%")
         )
       )
@@ -168,6 +170,7 @@ ui <- fluidPage(
           br(),
           plotOutput("simd_plot_1", width = "100%"),
           br(),
+          br(),
           plotOutput("simd_plot_2", width = "100%")
         )
       )
@@ -206,6 +209,7 @@ ui <- fluidPage(
         mainPanel(
           br(),
           plotOutput("specialty_plot_1", width = "100%"),
+          br(),
           br(),
           plotOutput("specialty_plot_2", width = "100%")
         )

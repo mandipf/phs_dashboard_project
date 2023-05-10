@@ -62,5 +62,5 @@ deprivation_default <- c(1, 2, 3, 4, 5)
 
 
 # specialty intermediate values
-specialty_choices <- unique(specialty_episode$specialty_name_top)
-specialty_default <- unique(specialty_episode$specialty_name_top)
+specialty_choices <- unique(specialty_df$specialty_name_top)
+specialty_default <- unique(specialty_df$specialty_name_top)

@@ -2,9 +2,20 @@ ui <- fluidPage(
   #theme = bs_theme(bootswatch = "cerulean"),
   #theme = bs_theme(bootswatch = "vapor"),
   theme = bs_theme(bootswatch = "pulse"),
-  titlePanel(title = h1("Effects of Covid-19 on hospital admissions in Scotland",
-                        align = "center"),
-             windowTitle = "Effects of CV-19 on hospital admissions"),
+  fluidRow(
+    column(
+      width = sidebarpanel_width,
+      offset = 0,
+      img(src='phs-logo.png', width = "100%")
+    ),
+    column(
+      width = (12 - sidebarpanel_width),
+      offset = 0,
+      titlePanel(title = h1("Effects of Covid-19 on hospital admissions in Scotland",
+                          align = "center"),
+               windowTitle = "Effects of CV-19 on hospital admissions"),
+  )
+  ),
   br(),
   
   tabsetPanel(
@@ -23,7 +34,8 @@ ui <- fluidPage(
                         `deselect_all`= TRUE,
                         `select_all` = TRUE,
                         `none-selected` = "zero"
-                      )
+                      ),
+                      selected = hb_choices
           ),
           br(),
           actionButton(
@@ -59,7 +71,8 @@ ui <- fluidPage(
                         `deselect_all`= TRUE,
                         `select_all` = TRUE,
                         `none-selected` = "zero"
-                      )
+                      ),
+                      selected = hb_choices
           ),
           br(),
           actionButton(
@@ -90,14 +103,21 @@ ui <- fluidPage(
                         `deselect_all`= TRUE,
                         `select_all` = TRUE,
                         `none-selected` = "zero"
-                      )
+                      ),
+                      selected = hb_choices
           ),
           br(),
-          checkboxGroupInput(
-            inputId = "age_input",
-            label = "Age range:",
-            choices = age_choices,
-            selected = age_default
+          pickerInput(inputId = "age_input",
+                      label = "Age range:",
+                      choices = age_choices,
+                      multiple = TRUE,
+                      options = list(
+                        `actions-box` = TRUE,
+                        `deselect_all`= TRUE,
+                        `select_all` = TRUE,
+                        `none-selected` = "zero"
+                      ),
+                      selected = age_choices
           ),
           br(),
           actionButton(
@@ -128,7 +148,8 @@ ui <- fluidPage(
                         `deselect_all`= TRUE,
                         `select_all` = TRUE,
                         `none-selected` = "zero"
-                      )
+                      ),
+                      selected = hb_choices
           ),
           br(),
           checkboxGroupInput(
@@ -166,7 +187,8 @@ ui <- fluidPage(
                         `deselect_all`= TRUE,
                         `select_all` = TRUE,
                         `none-selected` = "zero"
-                      )
+                      ),
+                      selected = hb_choices
           ),
           br(),
           checkboxGroupInput(

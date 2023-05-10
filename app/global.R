@@ -2,6 +2,7 @@
 library(tidyverse)
 library(bslib)
 library(here)
+library(shinyWidgets)
 
 # DATA FOR APP
 
@@ -9,7 +10,7 @@ library(here)
 ae_df <- read_csv(here("data/clean_datawaiting_times_clean.csv"))
 age_sex_df <- read_csv(here("data/clean_data/age_sex_clean.csv"))
 hb_names_df <- read_csv(here("data/clean_data/health_board_names.csv"))
-# home_hb_admissions_df <- read_csv(here("data/clean_data/ "))
+# home_hb_admissions_df <- read_csv(here("data/clean_data/home_hb_admissions"))
 simd_df <- read_csv(here("data/clean_data/simd_clean.csv"))
 specialty_episode <- read_csv(here("data/clean_data/specialty_mean_episodes.csv"))
 specialty_spell <- read_csv(here("data/clean_data/specialty_mean_lengthofspell.csv"))
@@ -38,8 +39,9 @@ year_slider_high <- year_default_high
 
 # main intermediate variables
 # hb_choices <- sort(c("All", "Glasgow City and Other stuff", "L2", "L3", "L4"))
-hb_choices <- c("All", unique(hb_names_df$HBName))
-hb_default <- "All"
+hb_choices <- unique(hb_names_df$HBName)
+# hb_choices <- c("All", unique(hb_names_df$HBName))
+# hb_default <- "All"
 
 
 # a&e intermediate values

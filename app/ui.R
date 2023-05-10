@@ -20,6 +20,17 @@ ui <- fluidPage(
             choices = hb_choices,
             selected = hb_default
           ),
+          # pickerInput(inputId = "hb_input_home",
+          #             label = "Health Board:",
+          #             choices = hb_choices,
+          #             multiple = TRUE,
+          #             options = list(
+          #               `actions-box` = TRUE,
+          #               `deselect_all`= TRUE,
+          #               `select_all` = TRUE,
+          #               `none-selected` = "zero"
+          #             )
+          # ),
           # br(),
           # sliderInput(
           #   inputId = "year_input",
@@ -161,12 +172,23 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           width = sidebarpanel_width,
-          selectInput(
-            inputId = "hb_input_simd",
-            label = "Health Board:",
-            choices = hb_choices,
-            selected = hb_default
+          pickerInput(inputId = "hb_input_simd",
+                      label = "Health Board:",
+                      choices = hb_choices,
+                      multiple = TRUE,
+                      options = list(
+                        `actions-box` = TRUE,
+                        `deselect_all`= TRUE,
+                        `select_all` = TRUE,
+                        `none-selected` = "zero"
+                      )
           ),
+          # selectInput(
+          #   inputId = "hb_input_simd",
+          #   label = "Health Board:",
+          #   choices = hb_choices,
+          #   selected = hb_default
+          # ),
           br(),
           # sliderInput(
           #   inputId = "year_input",

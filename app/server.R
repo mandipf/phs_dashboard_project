@@ -2,39 +2,41 @@ server <- function(input, output) {
   
   #####
   # HOME TAB
-  home_tab_1 <- eventReactive(
+  home_tab_df <- eventReactive(
     eventExpr = input$update_home,
     valueExpr = {
-  #     if (input$hb_input_home != "All"){
-  #       home_hb_admissions_df <- home_hb_admissions_df %>% 
-  #         filter(hb == input$hb_input_home)
-  #     }
-  #     home_hb_admissions_df %>% 
-  #       # group_by(Quarter, HB) %>% 
-  #       summarise(no_episodes = round(mean(Episodes , na.rm = TRUE),0),
-  #                 .by = c(Quarter, HB))
+      if (input$hb_input_home != "All"){
+        age_sex_df <- age_sex_df %>%
+          filter(hb == input$hb_input_home)
+      }
+      age_sex_df %>%
+        filter(hb != "Scotland") %>% 
+        # group_by(Quarter, HB) %>%
+        summarise(no_episodes = round(mean(episodes , na.rm = TRUE),0),
+                  avg_length_of_stay = round(mean(length_of_stay , na.rm = TRUE),0),
+                  .by = c(quarter, hb))
     })
 
-  home_tab_2 <- eventReactive(
-    eventExpr = input$update_home,
-    valueExpr = {
-  #     if (input$hb_input_home != "All"){
-  #       home_hb_admissions_df <- home_hb_admissions_df %>% 
-  #         filter(hb == input$hb_input_home)
-  #     }
-  #     home_hb_admissions %>%   
-  #       # group_by(Quarter, HB) %>% 
-  #       summarise(avg_length_of_stay = round(mean(LengthOfStay , na.rm = TRUE),0),
-  #                 .by = c(Quarter, HB))
-    })
+  # home_tab_2 <- eventReactive(
+  #   eventExpr = input$update_home,
+  #   valueExpr = {
+  # #     if (input$hb_input_home != "All"){
+  # #       home_hb_admissions_df <- home_hb_admissions_df %>% 
+  # #         filter(hb == input$hb_input_home)
+  # #     }
+  # #     home_hb_admissions %>%   
+  # #       # group_by(Quarter, HB) %>% 
+  # #       summarise(avg_length_of_stay = round(mean(LengthOfStay , na.rm = TRUE),0),
+  # #                 .by = c(Quarter, HB))
+  #   })
   
   output$home_plot_1 <- renderPlot({
     validate(
-      need(nrow(home_tab_1()) != 0,
+      need(nrow(home_tab_df()) != 0,
            "No data found that meet your search criteria"),
     )
-    home_tab_1() %>% 
-      ggplot(aes(x = Quarter, y = no_episodes, group = HB, colour = HB)) + 
+    home_tab_df() %>% 
+      ggplot(aes(x = quarter, y = no_episodes, group = hb, colour = hb)) + 
       geom_line() +
       geom_point(shape = 21, size = 2) + 
       labs(title = "Number of Episodes 2017 - 2023",
@@ -47,11 +49,11 @@ server <- function(input, output) {
   
   output$home_plot_2 <- renderPlot({
     validate(
-      need(nrow(home_tab_2()) != 0,
+      need(nrow(home_tab_df()) != 0,
            "No data found that meet your search criteria"),
     )
-    home_tab_2() %>% 
-      ggplot(aes(x = Quarter, y = avg_length_of_stay, group = HB, colour = HB)) + 
+    home_tab_df() %>% 
+      ggplot(aes(x = quarter, y = avg_length_of_stay, group = hb, colour = hb)) + 
       geom_line() +
       geom_point(shape = 21, size = 2) + 
       labs(title = "Average Length of Stay 2017 - 2023",
@@ -213,11 +215,12 @@ server <- function(input, output) {
   simd_tab_df <- eventReactive(
     eventExpr = input$update_simd,
     valueExpr = {
-      if (input$hb_input_simd != "All"){
-        simd_df <- simd_df %>% 
-          filter(hb == input$hb_input_simd)
-      }
+      # if (input$hb_input_simd != "All"){
+      #   simd_df <- simd_df %>% 
+      #     filter(hb %in% input$hb_input_simd)
+      # }
       simd_df %>% 
+        filter(hb %in% input$hb_input_simd) %>% 
         filter(simd %in% input$simd_input) %>% 
         summarise(mean_episodes = mean(episodes, na.rm = TRUE),
                   mean_length_of_stay = mean(length_of_stay, na.rm = TRUE),
@@ -247,7 +250,6 @@ server <- function(input, output) {
                  group = as.character(simd), colour = as.character(simd)))+
       geom_point()+
       geom_line()+
-      geom_hline(aes(yintercept = mean(mean_episodes)), linetype = "dotted")+
       scale_colour_manual(values = phs_colours)+
       annual_marker()+
       my_theme()
@@ -263,7 +265,7 @@ server <- function(input, output) {
                  group = as.character(simd), colour = as.character(simd)))+
       geom_point()+
       geom_line()+
-      geom_hline(aes(yintercept = mean(mean_length_of_stay)), linetype = "dotted")+
+      #geom_hline(aes(yintercept = mean(mean_length_of_stay)), linetype = "dotted")+
       labs(x = "Quarter/Year",
            y = "Mean number of episodes")+
       scale_colour_manual(values = phs_colours)+

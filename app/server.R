@@ -27,7 +27,7 @@ server <- function(input, output) {
            x = "Health Board", 
            y = "Number of Episodes")+
       scale_colour_manual(values = phs_colours)+
-      annual_marker()+
+      quarter_annual_marker()+
       my_theme()
     } else {
       home_tab_1() %>% 
@@ -39,7 +39,7 @@ server <- function(input, output) {
              x = "Health Board", 
              y = "Average Length of Stay")+
         scale_colour_manual(values = phs_colours)+
-        annual_marker()+
+        quarter_annual_marker()+
         my_theme()
     }
   })
@@ -67,7 +67,7 @@ server <- function(input, output) {
            x = "Health Board", 
            y = "Occupancy Percentage")+
       scale_colour_manual(values = phs_colours)+
-      annual_marker()+
+      quarter_annual_marker()+
       my_theme()
   })
   
@@ -84,7 +84,12 @@ server <- function(input, output) {
         summarise(no_admissions = sum(NumberOfAttendancesAggregate, na.rm = TRUE),
                   no_stay = sum(DischargeDestinationAdmissionToSame, na.rm = TRUE), 
                   no_discharge = sum(DischargeDestinationResidence, na.rm = TRUE),
-                  .by = Year)
+                  prop_stay = no_stay / no_admissions,
+                  prop_discharge = no_discharge / no_admissions,
+                  .by = Month) %>% 
+        mutate(season = case_when(str_detect(Month, "12$") ~ "Winter",
+                                  str_detect(Month, "0[12]$") ~ "Winter",
+                                  TRUE ~ "Other"))
     })
   
   output$ae_plot_1 <- renderPlot({
@@ -93,10 +98,13 @@ server <- function(input, output) {
            "No data found that meet your search criteria"),
     )
     ae_tab_df() %>% 
-      ggplot(aes(x = Year, y = no_admissions)) + 
-      geom_line(group = 1) +
-      geom_point(shape = 21, size = 2) +
+      ggplot(aes(x = as.character(Month), y = no_admissions, fill = season)) + 
+      geom_line(group = 1)+
+      geom_point(shape = 21, size = 3) +
       scale_colour_manual(values = phs_colours)+
+      scale_fill_manual(values = c("Winter" = "red",
+                                   "Other" = "black"))+
+      month_annual_marker()+
       my_theme()
   })
   
@@ -106,19 +114,37 @@ server <- function(input, output) {
            "No data found that meet your search criteria"),
     )
     ae_tab_df() %>% 
-      ggplot(aes(x = Year)) + 
-      geom_line(aes(y= no_stay), group = 1, colour = "#3F3685") +
-      geom_point(aes(y= no_stay), shape = 21, size = 2) +
-      geom_line(aes(y= no_discharge), group = 1, colour = "#9B4393") +
-      geom_point(aes(y= no_discharge), shape = 21, size = 2) +
+      ggplot(aes(x = as.character(Month), fill = season)) + 
+      geom_line(aes(y= prop_stay), group = 1, colour = "#3F3685") +
+      geom_point(aes(y= prop_stay), shape = 21, size = 2) +
+      geom_line(aes(y= prop_discharge), group = 1, colour = "#D26146") +
+      annotate("text", x = "201702",
+               y = (ae_tab_df()$prop_stay[2]),
+               label = "No. of stays",
+               vjust = -2,
+               hjust = 0,
+               colour = "#3F3685",
+               size = 7) +
+      annotate("text", x = "201702",
+               y = ae_tab_df()$prop_discharge[2],
+               label = "No. of discharges",
+               vjust = 2,
+               hjust = 0,
+               colour = "#D26146",
+               size = 7) +
+      geom_point(aes(y= prop_discharge), shape = 21, size = 2) +
       scale_y_continuous(labels = scales::comma) +
       scale_colour_manual(values = phs_colours)+
+      scale_fill_manual(values = c("Winter" = "red",
+                                   "Other" = "black"))+
+      xlim("201701", "202308")+
+      month_annual_marker()+
       my_theme()
   })
   
-  
-  
-  
+
+
+    
   #####  
   # AGE_SEX TAB
   age_gender_tab_df <- eventReactive(
@@ -143,7 +169,7 @@ server <- function(input, output) {
       geom_point()+
       geom_line()+
       scale_colour_manual(values = phs_colours)+
-      annual_marker()+
+      quarter_annual_marker()+
       my_theme()
   })
   
@@ -158,7 +184,7 @@ server <- function(input, output) {
       geom_point()+
       geom_line()+
       scale_colour_manual(values = phs_colours)+
-      annual_marker()+
+      quarter_annual_marker()+
       my_theme()
   })
   
@@ -189,7 +215,7 @@ server <- function(input, output) {
       geom_point()+
       geom_line()+
       scale_colour_manual(values = phs_colours)+
-      annual_marker()+
+      quarter_annual_marker()+
       my_theme()
   })
   
@@ -206,7 +232,7 @@ server <- function(input, output) {
       labs(x = "Quarter/Year",
            y = "Mean number of episodes")+
       scale_colour_manual(values = phs_colours)+
-      annual_marker()+
+      quarter_annual_marker()+
       my_theme()
   })
   
@@ -239,7 +265,7 @@ server <- function(input, output) {
            y = "Mean number of episodes", 
            title="Mean number of episodes per quarter per year")+
       scale_colour_manual(values = phs_colours)+
-      annual_marker()+
+      quarter_annual_marker()+
       my_theme()
   })
   
@@ -256,7 +282,7 @@ server <- function(input, output) {
            y = "Mean of length of spell", 
            title="Mean of length of spell per quarter per year")+
       scale_colour_manual(values = phs_colours)+
-      annual_marker()+
+      quarter_annual_marker()+
       my_theme()
   })
 

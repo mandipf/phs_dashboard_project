@@ -23,7 +23,7 @@ server <- function(input, output) {
                    colour = hb, fill = hb)) + 
         geom_line(linewidth=1) +
         geom_point(shape = 21, size = 3) + 
-        labs(title = "Mean number of episodes per quarter\n in each health board",
+        labs(title = "Mean number of episodes per quarter\n across each health board",
              x = "\nYear", 
              y = "Mean number of episodes\n")+
         scale_colour_manual(values = phs_colours)+
@@ -36,7 +36,7 @@ server <- function(input, output) {
                    colour = hb, fill = hb)) + 
         geom_line(linewidth=1) +
         geom_point(shape = 21, size = 3) + 
-        labs(title = "Mean length of hospital stay per quarter\n in each health board",
+        labs(title = "Mean length of hospital stay per quarter\n across each health board",
              x = "\nYear", 
              y = "Mean length of stay (days)\n")+
         scale_colour_manual(values = phs_colours)+
@@ -65,7 +65,7 @@ server <- function(input, output) {
                  colour = HB, fill = HB)) + 
       geom_line(linewidth=1) +
       geom_point(shape = 21, size = 3) + 
-      labs(title = "Mean percentage of beds occupied per quarter\n in each health board",
+      labs(title = "Mean percentage of beds occupied per quarter\n across each health board",
            x = "\nYear", 
            y = "Percentage occupied\n")+
       scale_colour_manual(values = phs_colours)+
@@ -102,7 +102,7 @@ server <- function(input, output) {
       ggplot(aes(x = as.character(Month), y = no_admissions, fill = season)) + 
       geom_line(group = 1, linewidth=1)+
       geom_point(shape = 21, size = 3) +
-      labs(title = "Total number of admissions per month\n in all selected health boards",
+      labs(title = "Total number of admissions per month\n across all selected health boards",
            x = "\nYear", 
            y = "Total number of admissions\n")+
       scale_colour_manual(values = phs_colours)+
@@ -123,15 +123,15 @@ server <- function(input, output) {
       geom_line(aes(y= prop_stay), group = 1,
                 colour = "#3F3685", linewidth=1) +
       annotate("text", x = "201702", y = (ae_tab_df()$prop_stay[2]),
-               label = "No. of stays", vjust = -2, hjust = 0,
+               label = "Proportion of stays", vjust = -2, hjust = 0,
                colour = "#3F3685", size = 7) +
       geom_point(aes(y= prop_discharge), shape = 21, size = 3) +
       geom_line(aes(y= prop_discharge), group = 1,
                 colour = "#D26146", linewidth=1) +
       annotate("text", x = "201702", y = ae_tab_df()$prop_discharge[2],
-               label = "No. of discharges", vjust = 2, hjust = 0,
+               label = "Proportion of discharges", vjust = 2, hjust = 0,
                colour = "#D26146", size = 7) +
-      labs(title = "Proportion of admissions discharged and retained in same hospital per month\n in all selected health boards",
+      labs(title = "Proportion of admissions discharged and retained in same hospital per month\n across all selected health boards",
            x = "\nYear", 
            y = "Proportion of admissions\n")+
       scale_fill_manual(values = c("Winter" = "red", "Other" = "black"))+
@@ -163,7 +163,7 @@ server <- function(input, output) {
                  color = sex, fill = sex))+
       geom_point(shape = 21, size = 3)+
       geom_line(linewidth=1)+
-      labs(title = "Mean number of episodes per quarter\n in all selected health boards and age ranges",
+      labs(title = "Mean number of episodes per quarter\n across all selected health boards and age ranges",
            x = "\nYear", 
            y = "Mean number of episodes\n")+
       scale_colour_manual(values = phs_colours)+
@@ -182,7 +182,7 @@ server <- function(input, output) {
                  color = sex, fill = sex))+
       geom_point(shape = 21, size = 3)+
       geom_line(linewidth=1)+
-      labs(title = "Mean length of stay (total treatment) per quarter\n in all selected health boards and age ranges",
+      labs(title = "Mean length of stay (total treatment) per quarter\n across all selected health boards and age ranges",
            x = "\nYear", 
            y = "Mean length of stay (days)\n")+
       scale_colour_manual(values = phs_colours)+
@@ -216,7 +216,7 @@ server <- function(input, output) {
                  fill = as.character(simd)))+
       geom_point(shape = 21, size = 3)+
       geom_line(linewidth=1)+
-      labs(title = "Mean number of episodes per quarter\n in all selected health boards and SIMD categories",
+      labs(title = "Mean number of episodes per quarter\n across all selected health boards and SIMD categories",
            x = "\nYear", 
            y = "Mean number of episodes\n")+
       scale_colour_manual(values = phs_colours)+
@@ -236,7 +236,7 @@ server <- function(input, output) {
                  fill = as.character(simd)))+
       geom_point(shape = 21, size = 3)+
       geom_line(linewidth=1)+
-      labs(title = "Mean length of stay (total treatment) per quarter\n in all selected health boards and SIMD categories",
+      labs(title = "Mean length of stay (total treatment) per quarter\n across all selected health boards and SIMD categories",
            x = "\nYear", 
            y = "Mean length of stay (days)\n")+
       scale_colour_manual(values = phs_colours)+
@@ -269,7 +269,7 @@ server <- function(input, output) {
                  colour=specialty_name_top, fill=specialty_name_top))+
       geom_point(shape = 21, size = 3)+
       geom_line(linewidth=1)+
-      labs(title = "Mean number of episodes per quarter\n in all selected health boards and specialties",
+      labs(title = "Mean number of episodes per quarter\n across all selected health boards and specialties",
            x = "\nYear", 
            y = "Mean number of episodes\n")+
       scale_colour_manual(values = phs_colours)+
@@ -288,7 +288,7 @@ server <- function(input, output) {
                  colour=specialty_name_top, fill=specialty_name_top))+
       geom_point(shape = 21, size = 3)+
       geom_line(linewidth=1)+
-      labs(title = "Mean length of stay (total treatment) per quarter\n in all selected health boards and specialties",
+      labs(title = "Mean length of stay (total treatment) per quarter\n across all selected health boards and specialties",
            x = "\nYear", 
            y = "Mean length of stay (days)\n")+
       scale_colour_manual(values = phs_colours)+

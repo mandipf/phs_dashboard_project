@@ -33,7 +33,7 @@ simd_clean %>%
 ```
 
 
-## Length of episodes
+## Length of stay
 
 ```{r}
 simd_clean %>% 
@@ -54,8 +54,9 @@ simd_clean %>%
   annotate("text", x = "2022Q3", y = 15, label = "2022") +
   annotate("text", x = "2023Q3", y = 15, label = "2023") +
   labs(x = "Quarter/Year",
-       y = "Mean number of episodes")
+       y = "Mean length of stays")
 ```
+
 
 
 

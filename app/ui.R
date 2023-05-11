@@ -1,10 +1,19 @@
 ui <- fluidPage(
-  #theme = bs_theme(bootswatch = "cerulean"),
-  #theme = bs_theme(bootswatch = "vapor"),
   theme = bs_theme(bootswatch = "pulse"),
-  titlePanel(title = h1("Effects of Covid-19 on hospital admissions in Scotland",
-                        align = "center"),
-             windowTitle = "Effects of CV-19 on hospital admissions"),
+  fluidRow(
+    column(
+      width = sidebarpanel_width,
+      offset = 0,
+      img(src='phs-logo.png', width = "100%")
+    ),
+    column(
+      width = (12 - sidebarpanel_width),
+      offset = 0,
+      titlePanel(title = h1("Effects of Covid-19 on hospital admissions in Scotland",
+                            align = "center"),
+                 windowTitle = "Effects of CV-19 on hospital admissions"),
+    )
+  ),
   br(),
   
   tabsetPanel(
@@ -14,44 +23,34 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           width = sidebarpanel_width,
-          selectInput(
-            inputId = "hb_input_home",
-            label = "Health Board:",
-            choices = hb_choices,
-            selected = hb_default
+          pickerInput(inputId = "hb_input_home",
+                      label = "Health Board:",
+                      choices = hb_choices,
+                      multiple = TRUE,
+                      options = list(
+                        `actions-box` = TRUE,
+                        `deselect_all`= TRUE,
+                        `select_all` = TRUE,
+                        `none-selected` = "zero"
+                      ),
+                      selected = hb_choices
           ),
-          # br(),
-          # sliderInput(
-          #   inputId = "year_input",
-          #   label = "Year:",
-          #   min = year_slider_low,
-          #   max = year_slider_high,
-          #   value = c(year_default_low, year_default_high),
-          #   sep = ""
-          # ),
-          # br(),
-          # radioButtons(
-          #   inputId = "sex_input",
-          #   label = "Sex:",
-          #   choices = sex_choices,
-          #   inline = TRUE
-          # ),
-          # br(),
-          # checkboxGroupInput(
-          #   inputId = "age_input",
-          #   label = "Age range:",
-          #   choices = age_choices,
-          #   selected = age_default
-          # ),
           br(),
           actionButton(
             inputId = "update_home",
             label = "Submit"
+          ),
+          br(),
+          radioButtons(
+            inputId = "plot_selector",
+            label = "Admissions plot type:",
+            choices = c("Number of episodes", "Length of stay")
           )
         ),
         mainPanel(
           br(),
           plotOutput("home_plot_1", width = "100%"),
+          br(),
           br(),
           plotOutput("home_plot_2", width = "100%")
         )
@@ -63,35 +62,18 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           width = sidebarpanel_width,
-          selectInput(
-            inputId = "hb_input_ae",
-            label = "Health Board:",
-            choices = hb_choices,
-            selected = hb_default
+          pickerInput(inputId = "hb_input_ae",
+                      label = "Health Board:",
+                      choices = hb_choices,
+                      multiple = TRUE,
+                      options = list(
+                        `actions-box` = TRUE,
+                        `deselect_all`= TRUE,
+                        `select_all` = TRUE,
+                        `none-selected` = "zero"
+                      ),
+                      selected = hb_choices
           ),
-          # br(),
-          # sliderInput(
-          #   inputId = "year_input",
-          #   label = "Year:",
-          #   min = year_slider_low,
-          #   max = year_slider_high,
-          #   value = c(year_default_low, year_default_high),
-          #   sep = ""
-          # ),
-          # br(),
-          # radioButtons(
-          #   inputId = "ae_follow_up_input",
-          #   label = "A&E follow-up:",
-          #   choices = ae_follow_up_choices,
-          #   inline = TRUE
-          # ),
-          # br(),
-          # checkboxGroupInput(
-          #   inputId = "ae_dept_input",
-          #   label = "Follow-up department:",
-          #   choices = ae_dept_choices,
-          #   selected = ae_dept_default
-          # ),
           br(),
           actionButton(
             inputId = "update_ae",
@@ -101,6 +83,7 @@ ui <- fluidPage(
         mainPanel(
           br(),
           plotOutput("ae_plot_1", width = "100%"),
+          br(),
           br(),
           plotOutput("ae_plot_2", width = "100%")
         )
@@ -112,36 +95,32 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           width = sidebarpanel_width,
-          selectInput(
-            inputId = "hb_input_age_sex",
-            label = "Health Board:",
-            choices = hb_choices,
-            selected = hb_default
+          pickerInput(inputId = "hb_input_age_sex",
+                      label = "Health Board:",
+                      choices = hb_choices,
+                      multiple = TRUE,
+                      options = list(
+                        `actions-box` = TRUE,
+                        `deselect_all`= TRUE,
+                        `select_all` = TRUE,
+                        `none-selected` = "zero"
+                      ),
+                      selected = hb_choices
           ),
           br(),
-          # sliderInput(
-          #   inputId = "year_input",
-          #   label = "Year:",
-          #   min = year_slider_low,
-          #   max = year_slider_high,
-          #   value = c(year_default_low, year_default_high),
-          #   sep = ""
-          # ),
-          # br(),
-          checkboxGroupInput(
-            inputId = "age_input",
-            label = "Age range:",
-            choices = age_choices,
-            selected = age_default
+          pickerInput(inputId = "age_input",
+                      label = "Age range:",
+                      choices = age_choices,
+                      multiple = TRUE,
+                      options = list(
+                        `actions-box` = TRUE,
+                        `deselect_all`= TRUE,
+                        `select_all` = TRUE,
+                        `none-selected` = "zero"
+                      ),
+                      selected = age_choices
           ),
           br(),
-          # radioButtons(
-          #   inputId = "gender_input",
-          #   label = "Gender:",
-          #   choices = gender_choices,
-          #   inline = TRUE
-          # ),
-          # br(),
           actionButton(
             inputId = "update_age_sex",
             label = "Submit"
@@ -150,6 +129,7 @@ ui <- fluidPage(
         mainPanel(
           br(),
           plotOutput("age_gender_plot_1", width = "100%"),
+          br(),
           br(),
           plotOutput("age_gender_plot_2", width = "100%")
         )
@@ -161,22 +141,19 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           width = sidebarpanel_width,
-          selectInput(
-            inputId = "hb_input_simd",
-            label = "Health Board:",
-            choices = hb_choices,
-            selected = hb_default
+          pickerInput(inputId = "hb_input_simd",
+                      label = "Health Board:",
+                      choices = hb_choices,
+                      multiple = TRUE,
+                      options = list(
+                        `actions-box` = TRUE,
+                        `deselect_all`= TRUE,
+                        `select_all` = TRUE,
+                        `none-selected` = "zero"
+                      ),
+                      selected = hb_choices
           ),
           br(),
-          # sliderInput(
-          #   inputId = "year_input",
-          #   label = "Year:",
-          #   min = year_slider_low,
-          #   max = year_slider_high,
-          #   value = c(year_default_low, year_default_high),
-          #   sep = ""
-          # ),
-          # br(),
           checkboxGroupInput(
             inputId = "simd_input",
             label = "SIMD:",
@@ -193,6 +170,7 @@ ui <- fluidPage(
           br(),
           plotOutput("simd_plot_1", width = "100%"),
           br(),
+          br(),
           plotOutput("simd_plot_2", width = "100%")
         )
       )
@@ -203,22 +181,19 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           width = sidebarpanel_width,
-          selectInput(
-            inputId = "hb_input_specialty",
-            label = "Health Board:",
-            choices = hb_choices,
-            selected = hb_default
+          pickerInput(inputId = "hb_input_specialty",
+                      label = "Health Board:",
+                      choices = hb_choices,
+                      multiple = TRUE,
+                      options = list(
+                        `actions-box` = TRUE,
+                        `deselect_all`= TRUE,
+                        `select_all` = TRUE,
+                        `none-selected` = "zero"
+                      ),
+                      selected = hb_choices
           ),
           br(),
-          # sliderInput(
-          #   inputId = "year_input",
-          #   label = "Year:",
-          #   min = year_slider_low,
-          #   max = year_slider_high,
-          #   value = c(year_default_low, year_default_high),
-          #   sep = ""
-          # ),
-          # br(),
           checkboxGroupInput(
             inputId = "specialty_input",
             label = "Specialty:",
@@ -235,48 +210,10 @@ ui <- fluidPage(
           br(),
           plotOutput("specialty_plot_1", width = "100%"),
           br(),
+          br(),
           plotOutput("specialty_plot_2", width = "100%")
         )
       )
-    # ),
-    # # Effects of COVID-19 tab
-    # tabPanel(
-    #   title = "Covid-19",
-    #   sidebarLayout(
-    #     sidebarPanel(
-    #       width = sidebarpanel_width,
-    #       radioButtons(
-    #         inputId = "time_period",
-    #         label = "Time period:",
-    #         choices = time_period_choices,
-    #         inline = TRUE
-    #       ),
-    #       br(),
-    #       sliderInput(
-    #         inputId = "year_input",
-    #         label = "Year:",
-    #         min = year_slider_low,
-    #         max = year_slider_high,
-    #         value = c(year_default_low, year_default_high),
-    #         sep = ""
-    #       ),
-    #       br(),
-    #       checkboxGroupInput(
-    #         inputId = "specialty_input",
-    #         label = "Specialty:",
-    #         choices = specialty_choices,
-    #         selected = specialty_default
-    #       ),
-    #       br(),
-    #       actionButton(
-    #         inputId = "field_update",
-    #         label = "Submit"
-    #       ),
-    #     ),
-    #     mainPanel(
-    #       plotOutput("covid_plot", width = "90%")
-    #     )
-    #   )
     )
   ),
   

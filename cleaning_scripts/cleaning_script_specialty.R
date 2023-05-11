@@ -7,14 +7,28 @@ library(forcats)
 library(scales)
 
 #upload the raw data
-specialty <- read.csv("data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_and_specialty.csv") %>% 
-  janitor::clean_names()
-
-board_codes <- read_csv("data/raw_data/special-health-boards_19022021.csv") %>% 
+specialty_and_boards <- read.csv("data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_and_specialty.csv") %>% 
   janitor::clean_names() %>% 
-  rename(hb = shb)
-#add names of boards to the data
-specialty_and_boards <- left_join(specialty, board_codes, by = "hb")
+  mutate(hb = recode(hb,
+                     "SB0801" = "The Golden Jubilee National Hospital",
+                     "S08000015" = "Ayrshire and Arran",				
+                     "S08000016" = "Borders",
+                     "S08000017" =	"Dumfries and Galloway",
+                     "S08000029" = "Fife",
+                     "S08000019" =	"Forth Valley",
+                     "S08000020"	= "Grampian",
+                     "S08000031" =	"Greater Glasgow and Clyde",
+                     "S08000022" =	"Highland",
+                     "S08000032" =	"Lanarkshire",
+                     "S08000024" =	"Lothian",
+                     "S08000025"	= "Orkney",
+                     "S08000026" = "Shetland",
+                     "S08000030" =	"Tayside",
+                     "S08000028" =	"Western Isles",
+                     "S92000003" = "Scotland",
+                     "S27000001" = "Non-NHS Provider/Location",
+                     "SN0811" = "Louisa Jordan"
+  ))
 
 #naming all specialties apart from TOP-10 as "Other" 
 top_specialty <- specialty_and_boards %>% 
@@ -30,16 +44,10 @@ top_specialty <- specialty_and_boards %>%
                                                                    ifelse(specialty_name == "Urology", "Urology",
                                                                           ifelse(specialty_name == "Haematology", "Haematology", "Other" 
                                                                           )))))))))), .after=specialty_name) 
-#group_by and summarise - mean episodes.
-specialty_mean_episodes <- top_specialty %>% 
-  group_by(quarter, specialty_name_top) %>% 
-  summarise(mean=mean(episodes))
-#writing the data
-write_csv(x=specialty_mean_episodes, "data/clean_data/specialty_mean_episodes.csv", append = FALSE)
-#group_by and summarise - mean length of spell.
-specialty_mean_lengthofspell <- top_specialty %>% 
-  group_by(quarter, specialty_name_top) %>% 
-  summarise(mean=mean(length_of_spell))
-#writing the data
-write_csv(x=specialty_mean_lengthofspell, "data/clean_data/specialty_mean_lengthofspell.csv", append = FALSE)
+#selecting only needed columns
+specialty_clean <- top_specialty %>% 
+  select(quarter, hb, specialty_name_top, episodes, length_of_spell)
+
+#write the data
+write_csv(x=specialty_clean, "data/clean_data/specialty_clean.csv", append = FALSE)
 

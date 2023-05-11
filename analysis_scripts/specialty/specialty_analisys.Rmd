@@ -16,9 +16,11 @@ library(scales)
 
 #option 2 without facet_grid
 ```{r}
-top_specialty_mean_episodes <- read_csv("../../data/clean_data/specialty_mean_episodes.csv") 
+specialty_clean <- read_csv("../../data/clean_data/specialty_clean.csv") 
 
-top_specialty_mean_episodes %>% 
+specialty_clean %>% 
+  group_by(quarter, specialty_name_top) %>% 
+  summarise(mean=mean(episodes)) %>% 
   ggplot(aes(x=quarter, y=mean, colour=specialty_name_top, group=specialty_name_top))+
   geom_line(size=1)+
  theme(axis.text.x = element_text(angle = 90, hjust=1, size=5))+
@@ -39,9 +41,11 @@ annotate("text", x = "2017Q3", y = 15, label = "2017") +
 #plot for mean of length of spell
 ```{r}
 
-top_specialty_mean_lengthofspell <- read_csv("../../data/clean_data/specialty_mean_lengthofspell.csv") 
+specialty_clean <- read_csv("../../data/clean_data/specialty_clean.csv") 
 
-top_specialty_mean_lengthofspell %>% 
+specialty_clean %>% 
+  group_by(quarter, specialty_name_top) %>% 
+  summarise(mean=mean(length_of_spell)) %>% 
   ggplot(aes(x=quarter, y=mean, colour=specialty_name_top, group=specialty_name_top))+
   geom_line(size=1)+
  theme(axis.text.x = element_text(angle = 90, hjust=1, size=5))+

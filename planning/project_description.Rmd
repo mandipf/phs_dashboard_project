@@ -1,0 +1,97 @@
+---
+title: "PHS Dashboard Project Description Outline"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Names of group members
+
+Mark MacDonald, Mandip Farmahan, Sarah Henry, Vera Shcherbina
+
+<br>
+
+### Roles and responsibilities of each member
+
+- Mark: Analysis of A&E and bed occupancy data, and working on the app
+- Mandip: Designing and implementing the app, and analysis of Covid data   
+- Sarah: Analysis of patient demographics and deprivation data, and statistics
+- Vera: Analysis of speciality data and ethics
+- All: project planning, troubleshooting and presentation
+
+<br>
+
+### Brief description of dashboard topic
+
+Our dashboard contains data from Public Health Scotland (2017 to 2022) and  consists of patient admission numbers by Scottish health board (including A&E and inpatient data), length of stay and bed occupancy by health board. The data is separated by age, sex, Scottish index of multiple deprivation and medical specialty.
+
+The data was used to investigate the effects of the Covid-19 pandemic on acute care in Scotland, and determine if the media reported "winter crises" exists.
+
+<br>
+
+### Stages of the project
+
+- Set expections and objectives of the project;
+- Data exploration and choosing datasets;
+- Planning, and KPI decision;
+- Data wrangling preliminary analysis;
+- Dashboard app wireframe;
+- Setup Github repository and permissions; 
+- Dashboard app development;
+- Statistics and hypothesis testing;
+- Presentation. 
+
+<br>
+
+### Which tools were used in the project
+
+- Excalidraw (project planning and brain storming)
+- Git/GitHub (collaboration & version control)
+- Powerpoint (presentation)
+- R (coding, charts, shiny app and hypothesis testing)
+- Slack (code sharing)
+- Zoom (daily stand-ups, mob programming, discussions)
+
+<br>
+
+### How did you gather and synthesise requirements for the project?
+
+We prioritised the information given in the brief by defining KPIs and objectives after initial data exploration. We further prioritised essential components and "nice to haves". 
+
+We focused on number of episodes (admissions) and length of stay for analysis. The datasets form the structure of the app, with separate tabs for A&E, Age and Gender, SIMD and Specialty. We compared results across multiple health boards. 
+
+<br>
+
+### Motivations for using the data you have chosen
+
+A&E is the first point of contact for most patients in secondary care, and therefore we used the A&E dataset to answer the question about winter crisis effect. Also, it provided monthly data rather than quarterly data, therefore allowed us to specifically target December, January and February for this winter crisis analysis. 
+
+We used inpatient datasets from 2017 to 2022 to answer the questions about demographics and effect of Covid on acute care. We used the hospital bed dataset to compare the mean hospital occupancy for each health board. 
+
+<br>
+
+### Data quality and potential bias, including a brief summary of data cleaning and transformations
+
+From https://www.opendata.nhs.scot/about: *All data hosted on the Scottish Health and Social Care Open Data platform follows the open data standards set out by Public Health Scotland, ensuring consistency across the platform.*
+
+It is unclear if the dataset is biased as it only contains number of patients who attend hospital, and therefore does not include sick patients who choose not to contact the GP or go to hospital. No population information is provided within the data set to indicate the population covered by each health board within this timeframe. 
+
+To clean the datasets we used janitor package to clean up column headings and the datasets were reduced to only required columns for dashboard/ app optimisation. The time series data was inspected for gaps and all data sets were inspected for other potential inconsistencies.  
+
+<br>
+
+### How is the data stored and structured
+
+The data is in the form of anonymised CSV files which are linked by common identifiers between datasets. This allowed for multiple data sets to be connected together for certain analysis. 
+
+The benefits of storing the data in this manner were that all datasets could be linked together but each data subset could also be used in isolation. CSV files are also smaller in size than other data record formats. 
+
+<br>
+
+### Ethical and legal considerations of the data
+
+The datasets were obtained from Public Health Scotland. It is public sector information licensed under Open Government Data license 3.0. 
+
+As the data was anonymized by the provider, it doesn't contain any personally identifiable information, making it compliant with General Data Protection Regulation. 
+ 
+From an ethics point of view for the project, only cleaned and necessary data was stored and uploaded to GitHub.

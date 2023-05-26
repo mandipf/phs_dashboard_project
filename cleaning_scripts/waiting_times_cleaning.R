@@ -1,11 +1,16 @@
 library(tidyverse)
+library(here)
 
 #------------------------- Data Sets -------------------------------------------
-waiting_times <- read_csv(here::here("data/raw_data/a&e_waiting_times.csv"))
+waiting_times <-
+  read_csv(here("data/raw_data/monthly_ae_waitingtimes_202303.csv")) %>% 
+  janitor::clean_names()
 
 #------------------------- Add in Health board names ---------------------------
 waiting_times_clean <- waiting_times %>% 
-  mutate(HBT = recode(HBT,
+  # remove special health boards
+  filter(str_detect(hbt, "^S08")) %>% 
+  mutate(hb = recode(hbt,
                       "S08000015" = "Ayrshire and Arran",				
                       "S08000016" = "Borders",
                       "S08000017" =	"Dumfries and Galloway",
@@ -26,20 +31,17 @@ waiting_times_clean <- waiting_times %>%
 #------------------------- Add Seasonality ------------------------------------
 
 waiting_times_clean <- waiting_times_clean %>% 
-  filter(Month %in% 201701:202303) 
-
-waiting_times_clean <-waiting_times_clean %>% 
-  mutate(Month2 = as.character(Month))
-
-waiting_times_clean <- waiting_times_clean %>%
-  mutate(Season = case_when(str_detect(Month2, "0[345]$") ~ "ASpring", 
-                            str_detect(Month2, "0[678]$") ~ "BSummer",
-                            str_detect(Month2, "09$") ~ "CAutumn",
-                            str_detect(Month2, "1[01]$") ~ "CAutumn",
-                            TRUE ~ "DWinter")) %>% 
-  mutate(Year = str_c(str_sub(Month2, 1L,4L), "_",Season))
-
+  filter(month %in% 201701:202303) %>% 
+  mutate(season = case_when(str_detect(month, "12$") ~ "Winter",
+                            str_detect(month, "0[12]$") ~ "Winter",
+                            TRUE ~ "Other"))
 
 #------------------------------ write csv -------------------------------------
 
-write_csv(waiting_times_clean,here::here("data/clean_datawaiting_times_clean.csv"))
+waiting_times_clean <- waiting_times_clean %>% 
+  select(hb, month, season,
+         number_of_attendances_aggregate,
+         discharge_destination_admission_to_same,
+         discharge_destination_residence)
+
+write_csv(waiting_times_clean, here("data/clean_data/waiting_times_clean.csv"))

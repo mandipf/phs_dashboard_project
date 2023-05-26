@@ -1,12 +1,20 @@
 library(tidyverse)
+library(here)
+
 
 #------------------------- Data Sets -------------------------------------------
-admissions <- read_csv(here::here("data/raw_data/activity_by_board_of_treatment_Age_and_sex.csv"))
+hospital_beds <- 
+  read_csv(here("data/raw_data/beds_by_nhs_board_of_treatment_and_specialty.csv")) %>% 
+  janitor::clean_names()
 
 
-home_hb_admissions <- admissions %>% 
-  mutate(HB = recode(HB,
-                     "SB0801" = "The Golden Jubilee National Hospital",
+#------------------------- Add in Healthboard names ----------------------------
+
+home_hb_occupancy <- hospital_beds %>% 
+  # remove special health boards
+  filter(str_detect(hb, "^S08")) %>% 
+  # recode to full health board name
+  mutate(hb = recode(hb,
                      "S08000015" = "Ayrshire and Arran",				
                      "S08000016" = "Borders",
                      "S08000017" =	"Dumfries and Galloway",
@@ -20,16 +28,11 @@ home_hb_admissions <- admissions %>%
                      "S08000025"	= "Orkney",
                      "S08000026" = "Shetland",
                      "S08000030" =	"Tayside",
-                     "S08000028" =	"Western Isles",
-                     "S92000003" = "Scotland",
-                     "S27000001" = "Non-NHS Provider/Location", 
-                     "SN0811" = "Louisa Jordan"
-  )) %>% 
-  
-# Select columns
-  
-  select(Quarter, HB, LengthOfStay, Episodes)
+                     "S08000028" =	"Western Isles")) %>% 
+  # Select columns for "All acute"
+  filter(specialty_name == "All Acute") %>% 
+  select(quarter, hb, percentage_occupancy ) 
 
 #------------------------------ write csv -------------------------------------
 
-write_csv(home_hb_admissions,here::here("data/clean_data/home_hb_admissions.csv"))
+write_csv(home_hb_occupancy, here("data/clean_data/bed_occupancy_clean.csv"))

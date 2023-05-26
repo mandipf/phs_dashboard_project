@@ -1,14 +1,17 @@
 # read in libraries
 library(tidyverse)
+library(here)
 
 #read in data
-age_sex <- read_csv("data/raw_data/00c00ecc-b533-426e-a433-42d79bdea5d4.csv") %>% 
+age_sex <- 
+  read_csv(here("data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_age_and_sex.csv")) %>% 
   janitor::clean_names()
 
 # add health board names
-age_sex_hb <- age_sex %>% 
+age_sex_hb <- age_sex %>%
+  # remove special health boards
+  filter(str_detect(hb, "^S08")) %>% 
   mutate(hb = recode(hb,
-                     "SB0801" = "The Golden Jubilee National Hospital",
                      "S08000015" = "Ayrshire and Arran",				
                      "S08000016" = "Borders",
                      "S08000017" =	"Dumfries and Galloway",
@@ -22,15 +25,17 @@ age_sex_hb <- age_sex %>%
                      "S08000025"	= "Orkney",
                      "S08000026" = "Shetland",
                      "S08000030" =	"Tayside",
-                     "S08000028" =	"Western Isles",
-                     "S92000003" = "Scotland",
-                     "S27000001" = "Non-NHS Provider/Location",
-                     "SN0811" = "National Facility NHS Louisa Jordan")
+                     "S08000028" =	"Western Isles")
   )
 
 # select columns we need
 age_sex_clean <- age_sex_hb %>% 
-  select(id, quarter, hb, sex, age, episodes, length_of_stay)
+  select(quarter, hb, sex, age, episodes, length_of_stay) %>% 
+  # replace zeroes with NA in numerical columns
+  mutate(across(.cols = c(episodes, length_of_stay),
+                .fns = ~ na_if(.x, 0))) %>% 
+  # remove any rows that have NA for both numerical columns
+  filter(!(is.na(episodes) & (is.na(length_of_stay))))
 
 # write clean file to cleaned data folder
-write_csv(age_sex_clean, "data/clean_data/age_sex_clean.csv", append = FALSE)
+write_csv(age_sex_clean, here("data/clean_data/age_sex_clean.csv"))

@@ -8,8 +8,8 @@ library(shinyWidgets)
 # DATA FOR APP
 ae_df <- read_csv(here("data/clean_data/waiting_times_clean.csv"))
 age_sex_df <- read_csv(here("data/clean_data/age_sex_clean.csv"))
-hb_names_df <- read_csv(here("data/clean_data/health_board_names.csv"))
-home_hb_occ_df <- read_csv(here("data/clean_data/home_hb_occupancy.csv"))
+hb_names_df <- read_csv(here("data/clean_data/hb_names_clean.csv"))
+bed_occ_df <- read_csv(here("data/clean_data/bed_occupancy_clean.csv"))
 simd_df <- read_csv(here("data/clean_data/simd_clean.csv"))
 specialty_df <- read_csv(here("data/clean_data/specialty_clean.csv"))
 
@@ -20,7 +20,7 @@ source("R/plot_themes.R")
 
 # INTERMEDIATE VARIABLES
 sidebarpanel_width = 3
-hb_choices <- unique(hb_names_df$HBName)
+hb_choices <- unique(hb_names_df$hb_name)
 
 # age and gender intermediate variables
 age_choices <- unique(age_sex_df$age)
@@ -37,5 +37,5 @@ deprivation_choices <- list("1(Most Deprived)" = 1,
 deprivation_default <- c(1, 2, 3, 4, 5)
 
 # specialty intermediate values
-specialty_choices <- unique(specialty_df$specialty_name_top)
-specialty_default <- unique(specialty_df$specialty_name_top)
+specialty_choices <- sort(unique(specialty_df$specialty))
+specialty_default <- unique(specialty_df$specialty)

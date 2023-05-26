@@ -7,8 +7,8 @@ server <- function(input, output) {
     valueExpr = {
       age_sex_df %>%
         filter(hb %in% input$hb_input_home) %>% 
-        summarise(no_episodes = round(mean(episodes, na.rm = TRUE),0),
-                  avg_length_of_stay = round(mean(length_of_stay, na.rm = TRUE),0),
+        summarise(no_episodes = mean(episodes, na.rm = TRUE),
+                  avg_length_of_stay = mean(length_of_stay, na.rm = TRUE),
                   .by = c(quarter, hb))
     })
   
@@ -49,10 +49,10 @@ server <- function(input, output) {
   home_tab_2 <- eventReactive(
     eventExpr = input$update_home,
     valueExpr = {
-      home_hb_occ_df %>%
-        filter(HB %in% input$hb_input_home) %>% 
-        summarise(avg_occupancy_percentage = round(mean(PercentageOccupancy),0),
-                  .by = c(Quarter, HB))
+      bed_occ_df %>%
+        filter(hb %in% input$hb_input_home) %>% 
+        summarise(avg_occupancy_percentage = mean(percentage_occupancy),
+                  .by = c(quarter, hb))
     })
   
   output$home_plot_2 <- renderPlot({
@@ -61,8 +61,8 @@ server <- function(input, output) {
            "No data found that meet your search criteria"),
     )
     home_tab_2() %>% 
-      ggplot(aes(x = Quarter, y = avg_occupancy_percentage, group = HB,
-                 colour = HB, fill = HB)) + 
+      ggplot(aes(x = quarter, y = avg_occupancy_percentage, group = hb,
+                 colour = hb, fill = hb)) + 
       geom_line(linewidth=1) +
       geom_point(shape = 21, size = 3) + 
       labs(title = "Mean percentage of beds occupied per quarter\n across each health board",
@@ -81,16 +81,13 @@ server <- function(input, output) {
     eventExpr = input$update_ae,
     valueExpr = {
       ae_df %>% 
-        filter(HBT %in% input$hb_input_ae) %>% 
-        summarise(no_admissions = sum(NumberOfAttendancesAggregate, na.rm = TRUE),
-                  no_stay = sum(DischargeDestinationAdmissionToSame, na.rm = TRUE), 
-                  no_discharge = sum(DischargeDestinationResidence, na.rm = TRUE),
+        filter(hb %in% input$hb_input_ae) %>% 
+        summarise(no_admissions = sum(number_of_attendances_aggregate, na.rm = TRUE),
+                  no_stay = sum(discharge_destination_admission_to_same, na.rm = TRUE), 
+                  no_discharge = sum(discharge_destination_residence, na.rm = TRUE),
                   prop_stay = no_stay / no_admissions,
                   prop_discharge = no_discharge / no_admissions,
-                  .by = Month) %>% 
-        mutate(season = case_when(str_detect(Month, "12$") ~ "Winter",
-                                  str_detect(Month, "0[12]$") ~ "Winter",
-                                  TRUE ~ "Other"))
+                  .by = c(month, season))
     })
   
   output$ae_plot_1 <- renderPlot({
@@ -99,7 +96,7 @@ server <- function(input, output) {
            "No data found that meet your search criteria"),
     )
     ae_tab_df() %>% 
-      ggplot(aes(x = as.character(Month), y = no_admissions, fill = season)) + 
+      ggplot(aes(x = as.character(month), y = no_admissions, fill = season)) + 
       geom_line(group = 1, linewidth=1)+
       geom_point(shape = 21, size = 3) +
       labs(title = "Total number of admissions per month\n across all selected health boards",
@@ -118,7 +115,7 @@ server <- function(input, output) {
            "No data found that meet your search criteria"),
     )
     ae_tab_df() %>% 
-      ggplot(aes(x = as.character(Month), fill = season)) + 
+      ggplot(aes(x = as.character(month), fill = season)) + 
       geom_point(aes(y= prop_stay), shape = 21, size = 3) +
       geom_line(aes(y= prop_stay), group = 1,
                 colour = "#3F3685", linewidth=1) +
@@ -253,10 +250,10 @@ server <- function(input, output) {
     valueExpr = {
       specialty_df %>% 
         filter(hb %in% input$hb_input_specialty,
-               specialty_name_top %in% input$specialty_input) %>% 
-        summarise(mean_spell = mean(length_of_spell),
-                  mean_episode = mean(episodes),
-                  .by = c(quarter, specialty_name_top))
+               specialty %in% input$specialty_input) %>% 
+        summarise(mean_spell = mean(length_of_spell, na.rm = TRUE),
+                  mean_episode = mean(episodes, na.rm = TRUE),
+                  .by = c(quarter, specialty))
     })
   
   output$specialty_plot_1 <- renderPlot({
@@ -265,8 +262,8 @@ server <- function(input, output) {
            "No data found that meet your search criteria"),
     )
     speciality_tab_df() %>% 
-      ggplot(aes(x=quarter, y=mean_episode, group=specialty_name_top,
-                 colour=specialty_name_top, fill=specialty_name_top))+
+      ggplot(aes(x=quarter, y=mean_episode, group=specialty,
+                 colour=specialty, fill=specialty))+
       geom_point(shape = 21, size = 3)+
       geom_line(linewidth=1)+
       labs(title = "Mean number of episodes per quarter\n across all selected health boards and specialties",
@@ -284,8 +281,8 @@ server <- function(input, output) {
            "No data found that meet your search criteria"),
     )
     speciality_tab_df() %>%
-      ggplot(aes(x=quarter, y=mean_spell, group=specialty_name_top,
-                 colour=specialty_name_top, fill=specialty_name_top))+
+      ggplot(aes(x=quarter, y=mean_spell, group=specialty,
+                 colour=specialty, fill=specialty))+
       geom_point(shape = 21, size = 3)+
       geom_line(linewidth=1)+
       labs(title = "Mean length of stay (total treatment) per quarter\n across all selected health boards and specialties",

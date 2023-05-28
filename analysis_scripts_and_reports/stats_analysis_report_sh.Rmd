@@ -1,118 +1,117 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "Statistical analysis for PHS Scotland data"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+  pdf_document: default
 ---
 
-# Statistical analysis for PHS scotland data
-
-## Winter vs summer each year
-- number of admissions
-- proportion of beds
-- length of stay
-
-Compare mean from both
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE)
+```
 
 ```{r}
+# import libraries
+
 library(tidyverse)
+library(here)
 library(infer)
 ```
 
-
 ```{r}
-age_sex_clean <- read_csv("data/clean_data/age_sex_clean.csv")
+# import data sets
+
+age_sex_clean <- read_csv(here("data/clean_data/age_sex_clean.csv"))
+
+a_e_clean <- read_csv(here("data/clean_data/waiting_times_clean.csv")) %>% 
+  mutate(season = if_else(season == "Winter", "Winter", "Rest of Year"),
+         covid = case_when(str_detect(month, "^201") ~ "pre_covid",
+                           TRUE ~ "post_covid"),
+         prop_discharged_home = discharge_destination_residence / number_of_attendances_aggregate
+         )
 ```
 
-```{r}
+```{r, eval=FALSE}
+# Initial evaluation of age_sex
+
 age_sex_clean %>% 
   group_by(quarter) %>% 
-  summarise(mean_episodes = mean(episodes)) 
-  
-```
-
-```{r}
-a_e_clean <- read_csv("raw_data/clean_datawaiting_times_clean.csv")
+  summarise(mean_episodes = mean(episodes, na.rm = TRUE))
 ```
 
 
-
-```{r}
+```{r, eval=FALSE}
+# Initial evaluation of a_e waiting times winter effect
 a_e_clean %>% 
-  ggplot(aes(x = NumberOfAttendancesAggregate))+
+  group_by(season) %>% 
+  summarise(mean_admissions = mean(number_of_attendances_aggregate,
+                                   na.rm = TRUE),
+            mean_discharge_home = mean(discharge_destination_residence,
+                                       na.rm = TRUE),
+            mean_kept = mean(discharge_destination_admission_to_same,
+                             na.rm = TRUE),
+            mean_prop_discharge_home = mean(prop_discharged_home,
+                                            na.rm = TRUE))
+
+# Initial evaluation of a_e waiting times winter effect
+a_e_clean %>% 
+  group_by(covid) %>% 
+  summarise(mean_admissions = mean(number_of_attendances_aggregate,
+                                   na.rm = TRUE),
+            mean_discharge_home = mean(discharge_destination_residence,
+                                       na.rm = TRUE),
+            mean_kept = mean(discharge_destination_admission_to_same,
+                             na.rm = TRUE),
+            mean_prop_discharge_home = mean(prop_discharged_home,
+                                            na.rm = TRUE))
+```
+
+
+```{r, eval=FALSE}
+# Initial plot evaluation of a_e waiting times
+
+a_e_clean %>% 
+  ggplot(aes(x = number_of_attendances_aggregate))+
   geom_histogram()
-```
 
-```{r}
 a_e_clean %>% 
-  filter(str_detect(Season, "Winter$"))
-```
-
-```{r}
-a_e_clean %>% 
-  filter(str_detect(Season, "Winter$")) %>% 
-   ggplot(aes(x = NumberOfAttendancesAggregate))+
+  filter(season == "Winter") %>% 
+  ggplot(aes(x = number_of_attendances_aggregate))+
   geom_histogram()
-```
 
-```{r}
-winter %>% 
-  summarise(mean = mean(NumberOfAttendancesAggregate))
-```
-
-
-```{r}
-a_e_clean_winter<- a_e_clean %>%
-  mutate(winter = case_when(Season == "DWinter" ~ "Winter",
-                            TRUE ~ "Rest of Year"))
-```
-
-
-
-```{r}
-a_e_clean_winter %>% 
-  group_by(winter) %>% 
-  summarise(mean_admissions = mean(NumberOfAttendancesAggregate),
-            mean_discharge_home = mean(DischargeDestinationResidence, na.rm = TRUE),
-            mean_transfer = mean(DischargeDestinationTransfer, na.rm = TRUE))
-```
-
-```{r}
-a_e_clean_winter %>% 
-  group_by(winter) %>% 
-  ggplot(aes(x = NumberOfAttendancesAggregate, y = winter))+
-  geom_boxplot()+
-  labs(
-    title = "A&E attendances"
-  )
-```
-
-```{r}
-a_e_clean_winter %>% 
-  group_by(winter) %>% 
-  ggplot(aes(x = DischargeDestinationResidence, y = winter))+
-  geom_boxplot()+
-  labs(
-    title = "Patients discharged home")
-```
-
-```{r}
-a_e_clean_winter %>% 
-  group_by(winter) %>% 
-  ggplot(aes(x = DischargeDestinationTransfer, y = winter))+
-  geom_boxplot()+
-  labs(
-    title = "Patients transfered")
-```
-
-
-```{r}
 a_e_clean %>% 
-  group_by(Season) %>% 
-  summarise(mean_admissions = mean(NumberOfAttendancesAggregate))
-```
-# Test 1: Are the number of admissions in winter higher than in the rest of the year?
+  drop_na(number_of_attendances_aggregate) %>% 
+  ggplot(aes(x = number_of_attendances_aggregate, y = season))+
+  geom_boxplot()+
+  labs(title = "A&E attendances")
 
-## Step 1: generate hypothesis and significance level 
+a_e_clean %>% 
+  drop_na(discharge_destination_residence) %>% 
+  ggplot(aes(x = discharge_destination_residence, y = season))+
+  geom_boxplot()+
+  labs(title = "Patients discharged home")
+
+a_e_clean %>% 
+  drop_na(prop_discharged_home) %>% 
+  ggplot(aes(x = prop_discharged_home, y = season))+
+  geom_boxplot()+
+  labs(title = "Proportion patients discharged home")
+
+a_e_clean %>% 
+  drop_na(discharge_destination_admission_to_same) %>% 
+  ggplot(aes(x = discharge_destination_admission_to_same, y = season))+
+  geom_boxplot()+
+  labs(title = "Patients kept")
+```
+
+<br>
+
+## Test 1: Are the number of admissions in winter higher than in the rest of the year?
+
+#### Step 1: Generate hypothesis 
 
 H0: mean(winter admissions) = mean(rest of year admissions)
 $$H_0:  \mu_{\textrm{winter admissions}} -  \mu_{\textrm{rest of year admissions}} <=0$$
@@ -120,126 +119,207 @@ H1: mean(winter admissions) > mean(summer admissions)
 $$H_1:  \mu_{\textrm{winter admissions}} -  \mu_{\textrm{rest of year admissions}}\ > 0$$
 significance level = 0.05
 
-## Step 2: Data wrangling
+#### Step 2: Calculate observed stat
 
 ```{r}
-a_e_clean_winter<- a_e_clean %>%
-  mutate(winter = case_when(Season == "DWinter" ~ "Winter",
-                            TRUE ~ "Rest of Year"))
-```
-
-Quick look at means
-```{r}
-a_e_clean_winter %>% 
-  group_by(winter) %>% 
-  summarise(mean_admissions = mean(NumberOfAttendancesAggregate, na.rm = TRUE),
-            mean_discharge_home = mean(DischargeDestinationResidence, na.rm = TRUE),
-            mean_transfer = mean(DischargeDestinationTransfer, na.rm = TRUE))
-```
-
-```{r}
-a_e_clean_winter %>% 
-  filter(winter == "Winter") %>% 
-  ggplot(aes(x = NumberOfAttendancesAggregate))+
-  geom_histogram()
-```
-
-
-```{r}
-a_e_clean_winter %>% 
-  filter(winter != "Winter") %>% 
-  ggplot(aes(x = NumberOfAttendancesAggregate))+
-  geom_histogram()
-```
-```{r}
-a_e_clean_winter %>% 
-  count(winter)
-```
-## Step 3: Calculate observed statistic (mean for both groups, winter - rest of year)
-
-
-```{r}
-observed_stat <- a_e_clean_winter %>% 
-  specify(response = NumberOfAttendancesAggregate, explanatory = winter) %>% 
+observed_stat <- a_e_clean %>%
+  drop_na(number_of_attendances_aggregate) %>% 
+  specify(response = number_of_attendances_aggregate, explanatory = season) %>% 
   calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
 
 observed_stat
 ```
-## Step 4: generate null distribution and visualise
+
+#### Step 3: Generate null distribution and visualise
   
 ```{r}
-null_distribution <- a_e_clean_winter %>% 
-  specify(response = NumberOfAttendancesAggregate, explanatory = winter) %>% 
+null_distribution <- a_e_clean %>%
+  drop_na(number_of_attendances_aggregate) %>% 
+  specify(response = number_of_attendances_aggregate, explanatory = season) %>% 
   hypothesise(null = "independence") %>% 
   generate(reps = 1000, type = "permute") %>% 
   calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
-```
 
-```{r}
 null_distribution %>% 
   visualise(bins = 25)+
   shade_p_value(obs_stat = observed_stat$stat, 
                 direction = "greater")
 ```
-## Step 5: Get p-value and interpret
+
+#### Step 4: Get p-value and interpret
 
 ```{r}
 null_distribution %>% 
   get_p_value(obs_stat = observed_stat$stat, 
                 direction = "greater")
 ```
+
 p-value is much higher than our significance level and therefore we fail to reject the H0 in favour of the Ha. ie the number of admissions in winter is equal or less than the mean number of admissions for the rest of the year.  
 
+<br>
 
-# Test 2: Rate of discharged home
-Is there a higher discharge home rate in the summer compared to winter?
+---
 
-## Step1: Generate hypothesis
-H0: mean(winter discharge home) = mean(rest of year discharge home)
-$$H_0:  \mu_{\textrm{rest of year discharge home}} -  \mu_{\textrm{winter discharge home}} <=0$$
-H1: higher mean discharge home in rest of year compared to winter )
-$$H_1:  \mu_{\textrm{rest of year discharged home}} -  \mu_{\textrm{winter discharged home}}>0$$
+## Test 2: Is the winter rate of admissions different pre-covid?
+
+Are the number of admissions in winter higher than in the rest of the year before Covid?
+
+#### Step 1: Generate hypothesis
+
+H0: mean(winter admissions pre_covid) = mean(rest of year admissions pre covid)
+
+$$H_0:  \mu_{\textrm{winter admissions pre-covid}} -  \mu_{\textrm{rest of year admissions pre-covid}} <=0$$
+H1: mean(winter admissions pre-covid) > mean(summer admissions pre-covid)
+
+$$H_1:  \mu_{\textrm{winter admissions pre-covid}} -  \mu_{\textrm{rest of year admissions pre-covid}}\ > 0$$
+
 significance level = 0.05
 
-## Step 2: Data wrangling
-Done - use a_e_clean_winter
-Quick look at boxplot
-```{r}
-a_e_clean_winter %>% 
-  group_by(winter) %>% 
-  ggplot(aes(x = DischargeDestinationResidence, y = winter))+
-  geom_boxplot()+
-  labs(
-    title = "Patients discharged home")
-```
-
-## Step 3: Calculate observed statistic (mean for both groups, subtract Winter from rest of year)
-
+#### Step 2: Calculate observed stat
 
 ```{r}
-obs_stat <- a_e_clean_winter %>% 
-  specify(response = DischargeDestinationResidence, explanatory = winter) %>% 
-  calculate(stat = "diff in means", order = c("Rest of Year", "Winter"))
+obs_stat <- a_e_clean %>%
+  filter(covid == "pre_covid") %>% 
+  drop_na(number_of_attendances_aggregate) %>% 
+  specify(response = number_of_attendances_aggregate, explanatory = season) %>% 
+  calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
 
 obs_stat
 ```
-## Step 4: generate null distribution and visualise
-  
-```{r}
-null_distribution <- a_e_clean_winter %>% 
-  specify(response = DischargeDestinationResidence, explanatory = winter) %>% 
-  hypothesise(null = "independence") %>% 
-  generate(reps = 1000, type = "permute") %>% 
-  calculate(stat = "diff in means", order = c("Rest of Year", "Winter"))
-```
+
+#### Step 3: Generate null distribution and visualise
 
 ```{r}
+null_distribution <- a_e_clean %>%
+  filter(covid == "pre_covid") %>% 
+  drop_na(number_of_attendances_aggregate) %>% 
+  specify(response = number_of_attendances_aggregate, explanatory = season) %>% 
+  hypothesise(null = "independence") %>% 
+  generate(reps = 1000, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
+
 null_distribution %>% 
   visualise(bins = 25)+
   shade_p_value(obs_stat = obs_stat$stat, 
                 direction = "greater")
 ```
-## Step 5: Get p value and interpret
+
+#### Step 4: Get p-value and interpret
+
+```{r}
+null_distribution %>% 
+  get_p_value(obs_stat = obs_stat$stat, 
+                direction = "greater")
+```
+
+Fail to reject the null hypothesis, ie the number of admissions to A&E in winter is the same as, or less than, admissions in the rest of the year. 
+
+<br>
+
+---
+
+## Test 3: Is the winter rate of admissions different post-covid
+
+Are the number of admissions in winter higher than in the rest of the year after Covid?
+
+#### Step 1: Generate hypothesis
+
+H0: mean(winter admissions post_covid) = mean(rest of year admissions post covid)
+
+$$H_0:  \mu_{\textrm{winter admissions post-covid}} -  \mu_{\textrm{rest of year admissions post-covid}} <=0$$
+H1: mean(winter admissions post-covid) > mean(summer admissions post-covid)
+
+$$H_1:  \mu_{\textrm{winter admissions post-covid}} -  \mu_{\textrm{rest of year admissions post-covid}}\ > 0$$
+
+significance level = 0.05
+
+#### Step 2: Calculate observed stat
+
+```{r}
+obs_stat <- a_e_clean %>%
+  filter(covid == "post_covid") %>% 
+  drop_na(number_of_attendances_aggregate) %>%
+  specify(response = number_of_attendances_aggregate, explanatory = season) %>% 
+  calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
+
+obs_stat
+```
+
+#### Step 3: Generate null distribution and visualise
+
+```{r}
+null_distribution  <- a_e_clean %>%
+  filter(covid == "post_covid") %>% 
+  drop_na(number_of_attendances_aggregate) %>%
+  specify(response = number_of_attendances_aggregate, explanatory = season) %>%
+  hypothesise(null = "independence") %>% 
+  generate(reps = 1000, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
+
+null_distribution %>% 
+  visualise(bins = 25)+
+  shade_p_value(obs_stat = obs_stat$stat, 
+                direction = "greater")
+```
+
+#### Step 4: Get p-value and interpret
+
+```{r}
+null_distribution %>% 
+  get_p_value(obs_stat = obs_stat$stat, 
+                direction = "greater")
+```
+
+Fail to reject the null hypothesis, ie the number of admissions to A&E in winter is the same as, or less than, admissions in the rest of the year. 
+
+<br>
+
+---
+
+## Test 4A: Are the number of people discharged home in winter higher than in the rest of the year?
+
+Is there a higher discharge home rate in the summer compared to winter?
+
+#### Step 1: Generate hypothesis
+
+H0: mean(winter discharge home) = mean(rest of year discharge home)
+
+$$H_0:  \mu_{\textrm{rest of year discharge home}} -  \mu_{\textrm{winter discharge home}} <=0$$
+H1: higher mean discharge home in rest of year compared to winter )
+
+$$H_1:  \mu_{\textrm{rest of year discharged home}} -  \mu_{\textrm{winter discharged home}}>0$$
+
+significance level = 0.05
+
+#### Step 2: Calculate observed stat
+
+```{r}
+obs_stat <- a_e_clean %>%
+  drop_na(discharge_destination_residence) %>% 
+  specify(response = discharge_destination_residence, explanatory = season) %>% 
+  calculate(stat = "diff in means", order = c("Rest of Year", "Winter"))
+
+obs_stat
+```
+
+#### Step 3: Generate null distribution and visualise
+  
+```{r}
+null_distribution <- a_e_clean %>%
+  drop_na(discharge_destination_residence) %>% 
+  specify(response = discharge_destination_residence, explanatory = season) %>% 
+  hypothesise(null = "independence") %>% 
+  generate(reps = 1000, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Rest of Year", "Winter"))
+
+null_distribution %>% 
+  visualise(bins = 25)+
+  shade_p_value(obs_stat = obs_stat$stat, 
+                direction = "greater")
+```
+
+#### Step 4: Get p value and interpret
+
 ```{r}
 null_distribution %>% 
   get_p_value(obs_stat = obs_stat$stat, 
@@ -248,192 +328,15 @@ null_distribution %>%
 
 p-value is less than our significance level and therefore we reject the H0 in favour of the Ha: ie there is higher discharge to home rate in the summer compared to winter.
 
+<br>
 
-# Test 3: Is the winter rate of admissions different pre and post covid?
+---
 
-Are the number of admissions in winter higher than in the rest of the year before Covid?
+## Test 4B: Are the proportion of people discharged home in winter higher different from the rest of the year?
 
-H0: mean(winter admissions pre_covid) = mean(rest of year admissions pre covid)
-$$H_0:  \mu_{\textrm{winter admissions pre-covid}} -  \mu_{\textrm{rest of year admissions pre-covid}} <=0$$
-H1: mean(winter admissions pre-covid) > mean(summer admissions pre-covid)
-$$H_1:  \mu_{\textrm{winter admissions pre-covid}} -  \mu_{\textrm{rest of year admissions pre-covid}}\ > 0$$
-## Step 2: Data wrangling and quick explore
-```{r}
-ae_winter_covid <- a_e_clean_winter %>%
-  mutate(covid = case_when(str_detect(Quarter, "^201") ~ "pre_covid",
-                            TRUE ~ "post_covid"))
-```
-
-```{r}
-ae_winter_precovid <- ae_winter_covid %>% 
-  filter(covid == "pre_covid")
-```
-
-
-
-```{r}
-ae_winter_precovid %>% 
-  group_by(winter) %>% 
-  summarise(mean_admissions = mean(NumberOfAttendancesAggregate),
-            mean_discharge_home = mean(DischargeDestinationResidence, na.rm = TRUE),
-            mean_transfer = mean(DischargeDestinationTransfer, na.rm = TRUE))
-```
-
-## Step 3: Calculate observed stat (mean admissions pre-covid)
-
-```{r}
-obs_stat_precovid <- ae_winter_precovid %>% 
-  specify(response = NumberOfAttendancesAggregate, explanatory = winter) %>% 
-  calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
-
-obs_stat_precovid
-```
-## Step4:  Generate null distribution and visualise
-```{r}
-null_dist_precovid <- ae_winter_precovid %>% 
-  specify(response = NumberOfAttendancesAggregate, explanatory = winter) %>% 
-  hypothesise(null = "independence") %>% 
-  generate(reps = 1000, type = "permute") %>% 
-  calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
-```
-
-```{r}
-null_dist_precovid %>% 
-  visualise(bins = 25)+
-  shade_p_value(obs_stat = obs_stat_precovid$stat, 
-                direction = "greater")
-```
-## Step 5: get p-value and interpret
-
-```{r}
-null_dist_precovid %>% 
-  get_p_value(obs_stat = obs_stat_precovid$stat, 
-                direction = "greater")
-```
-
-Fail to reject the null hypothesis, ie the number of admissions to A&E in winter is the same as, or less than, admissions in the rest of the year. 
-
-
-# Test 4: post covid admission rates
-
-Are the number of admissions in winter higher than in the rest of the year after Covid?
-
-H0: mean(winter admissions post_covid) = mean(rest of year admissions post covid)
-$$H_0:  \mu_{\textrm{winter admissions post-covid}} -  \mu_{\textrm{rest of year admissions post-covid}} <=0$$
-H1: mean(winter admissions post-covid) > mean(summer admissions post-covid)
-$$H_1:  \mu_{\textrm{winter admissions post-covid}} -  \mu_{\textrm{rest of year admissions post-covid}}\ > 0$$
-## Step 2: Data wrangling and quick explore
-
-```{r}
-ae_winter_postcovid <- ae_winter_covid%>% 
-  filter(covid == "post_covid")
-```
-
-
-```{r}
-ae_winter_postcovid %>% 
-  group_by(winter) %>% 
-  summarise(mean_admissions = mean(NumberOfAttendancesAggregate),
-            mean_discharge_home = mean(DischargeDestinationResidence, na.rm = TRUE),
-            mean_transfer = mean(DischargeDestinationTransfer, na.rm = TRUE))
-```
-##Step 3: Calculate observed stat
-
-```{r}
-obs_stat_postcovid <- ae_winter_postcovid%>% 
-  specify(response = NumberOfAttendancesAggregate, explanatory = winter) %>% 
-  calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
-
-obs_stat_postcovid
-```
-
-## Step4:  Generate null distribution and visualise
-```{r}
-null_dist_postcovid <- ae_winter_postcovid %>% 
-  specify(response = NumberOfAttendancesAggregate, explanatory = winter) %>% 
-  hypothesise(null = "independence") %>% 
-  generate(reps = 1000, type = "permute") %>% 
-  calculate(stat = "diff in means", order = c("Winter", "Rest of Year"))
-
-```
-
-```{r}
-null_dist_postcovid %>% 
-  visualise(bins = 25)+
-  shade_p_value(obs_stat = obs_stat_postcovid$stat, 
-                direction = "greater")
-```
-
-## Step 5: Get p-value and interpret
-
-
-```{r}
-null_dist_postcovid %>% 
-  get_p_value(obs_stat = obs_stat_precovid$stat, 
-                direction = "greater")
-```
-
-Fail to reject the null hypothesis, ie the number of admissions to A&E in winter is the same as, or less than, admissions in the rest of the year. 
-
-
-
-```{r}
-a_e_winter_covid %>% 
-  group_by(winter, covid)
-```
-
-These figures indicate that pre and post covid there are always fewer mean admissions during winter, compared to the rest of the year. 
-
-# Check on Test 2. 
-
-Mean discharge to home rate is 1944.696. Is the discharge to home rate in the winter different to the mean for hte rest of the year? One -sample mean
-
-## Step1: Generate hypothesis
-H0: mean(winter discharge home) = mean(rest of year discharge home)
-$$H_0:  \mu_{\textrm{winter discharge home}} =1944.696$$
-H1: higher mean discharge home in rest of year compared to winter )
-$$H_1:  \mu_{\textrm{winter discharged home}}\ne 1944.696$$
-significance level = 0.05
-
-## Step 2: calculate observed stat
-
-```{r}
-obs_stat <- a_e_clean_winter %>%
-  filter(winter == "Winter") %>% 
-  summarise(mean_discharge_home_winter = mean(DischargeDestinationResidence, na.rm = TRUE))
-
-obs_stat
-```
-
-## Step 3: Generate null distribution
-
-
-```{r}
-winter_home_null_distr <- a_e_clean_winter %>% 
-  specify(response = DischargeDestinationResidence) %>% 
-  hypothesise(null = "point", mu = 1944.696) %>% 
-  generate(reps = 10000, type = "bootstrap") %>% 
-  calculate(stat = "mean")
-```
-## Step 4: Visualise
-
-
-```{r}
-winter_home_null_distr %>% 
-  visualise(bins = 30) +
-  shade_p_value(obs_stat = obs_stat$mean_discharge_home_winter, direction = "both")
-```
-## Step 5: Get p-value and interpret
-```{r}
-winter_home_null_distr %>% 
-  get_p_value(obs_stat = obs_stat$mean_discharge_home_winter, direction = "both")
-```
-
-
-# Test 4: Are there differences in the mean proportions of people sent home in winter, compared to the rest of the year
-
-## Step 1: generate hypothesis
 Are the proportions of patients to A&E discharged to home different in winter and the rest of the year. (Two means - independent)
+
+#### Step 1: Generate hypothesis
 
 H0: mean(proportion home discharged rest of year) - mean(proportion home discharge winter) <= 0
 
@@ -443,101 +346,41 @@ H1: mean(proportion home discharge rest of year) - mean(proportion home discharg
 
 $$H_1:  \mu_{\textrm{prop discharged rest of year}} -  \mu_{\textrm{prop discharge home winter}}>0$$
 
-H0: mean(proportion home discharged rest of year) - mean(proportion home discharge winter) <= 0
-H1: mean(proportion home discharge rest of year) - mean(proportion home discharge winter) > 0 
+significance level = 0.05
 
-## Data wrangling and explore (set up new prop_discharged_home variable)
-```{r}
-a_e_winter_covid <- a_e_winter_covid %>% 
-  mutate(prop_discharged_home = DischargeDestinationResidence/ NumberOfAttendancesAggregate)
-```
-
+#### Step 2: Calculate observed stat
 
 ```{r}
-a_e_winter_covid %>% 
-  group_by(winter) %>% 
-  summarise(mean_admissions = mean(NumberOfAttendancesAggregate),
-            mean_discharge_home = mean(DischargeDestinationResidence, na.rm = TRUE),
-            mean_transfer = mean(DischargeDestinationTransfer, na.rm = TRUE),
-            mean_prop_discharge_home = mean(prop_discharged_home, na.rm = TRUE))
-```
-```{r}
-a_e_winter_covid %>% 
-  group_by(winter, covid) %>% 
-  summarise(mean_admissions = mean(NumberOfAttendancesAggregate),
-            mean_discharge_home = mean(DischargeDestinationResidence, na.rm = TRUE),
-            mean_transfer = mean(DischargeDestinationTransfer, na.rm = TRUE),
-            mean_prop_discharge_home = mean(prop_discharged_home, na.rm = TRUE))
-```
-
-```{r}
-a_e_winter_covid %>% 
+obs_stat <- a_e_clean %>% 
   drop_na(prop_discharged_home) %>% 
-  ggplot(aes(x = prop_discharged_home, y = winter))+
-  geom_boxplot()
-```
-
-
-
-## Step 2: Calculate observed stat
-
-```{r}
-obs_stat_prop <- a_e_winter_covid %>% 
-  drop_na(prop_discharged_home) %>% 
-  specify(response = prop_discharged_home, explanatory = winter) %>% 
+  specify(response = prop_discharged_home, explanatory = season) %>% 
   calculate(stat = "diff in means", order = c("Rest of Year", "Winter"))
 
-obs_stat_prop
+obs_stat
 ```
-STep 3: calculate null distribution
+
+#### Step 3: Generate null distribution and visualise
 
 ```{r}
-null_dist_prop <- a_e_winter_covid %>% 
+null_distribution <- a_e_clean %>% 
   drop_na(prop_discharged_home) %>%
-  specify(response = prop_discharged_home, explanatory = winter) %>% 
+  specify(response = prop_discharged_home, explanatory = season) %>% 
   hypothesise(null = "independence") %>% 
   generate(reps = 5000, type = "permute") %>% 
   calculate(stat = "diff in means", order = c("Rest of Year", "Winter"))
 
-```
-
-
-```{r}
-null_dist_prop %>% 
+null_distribution %>% 
   visualise(bins = 25)+
-  shade_p_value(obs_stat = obs_stat_prop$stat, 
+  shade_p_value(obs_stat = obs_stat$stat, 
                 direction = "greater")
 ```
 
+#### Step 4: Get p-value and interpret
+
 ```{r}
-null_dist_prop %>% 
-  get_p_value(obs_stat = obs_stat_prop$stat, 
+null_distribution %>% 
+  get_p_value(obs_stat = obs_stat$stat, 
                 direction = "greater")
 ```
 
 The p-value is less than our 0.05 significance level, and therefore we can reject the H0 in facour of the Ha. This means that we the proportion of patients that are discharged home is higher in the rest of the year, compared to in winter time. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

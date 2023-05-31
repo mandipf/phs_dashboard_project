@@ -1,7 +1,6 @@
 server <- function(input, output) {
   
-  #####
-  # HOME TAB
+  # HOME TAB -----
   home_tab_1 <- eventReactive(
     eventExpr = input$update_home,
     valueExpr = {
@@ -75,8 +74,7 @@ server <- function(input, output) {
   })
   
   
-  #####
-  # A&E TAB
+  # A&E TAB -----
   ae_tab_df <- eventReactive(
     eventExpr = input$update_ae,
     valueExpr = {
@@ -137,8 +135,7 @@ server <- function(input, output) {
   })
   
   
-  #####  
-  # AGE_SEX TAB
+  # AGE_SEX TAB -----
   age_gender_tab_df <- eventReactive(
     eventExpr = input$update_age_sex,
     valueExpr = {
@@ -189,8 +186,7 @@ server <- function(input, output) {
   })
   
   
-  #####
-  # SIMD TAB
+  # SIMD TAB -----
   simd_tab_df <- eventReactive(
     eventExpr = input$update_simd,
     valueExpr = {
@@ -243,8 +239,7 @@ server <- function(input, output) {
   })
   
   
-  #####
-  # SPECIALTY TAB
+  # SPECIALTY TAB -----
   speciality_tab_df <- eventReactive(
     eventExpr = input$update_specialty,
     valueExpr = {
@@ -295,8 +290,7 @@ server <- function(input, output) {
   })
   
   
-  #####
-  # ALL TABS
+  # ALL TABS -----
   output$data_source_text <- renderText({
     "Data Source: https://www.opendata.nhs.scot/"
   })

@@ -1,11 +1,14 @@
-# LIBRARIES FOR APP
-library(tidyverse)
+# libraries for app
+library(dplyr)
+library(ggplot2)
+library(magrittr)
+library(readr)
 library(bslib)
 library(here)
 library(shinyWidgets)
 
 
-# DATA FOR APP
+# data for app
 ae_df <- read_csv(here("data/clean_data/waiting_times_clean.csv"))
 age_sex_df <- read_csv(here("data/clean_data/age_sex_clean.csv"))
 hb_names_df <- read_csv(here("data/clean_data/hb_names_clean.csv"))
@@ -14,17 +17,17 @@ simd_df <- read_csv(here("data/clean_data/simd_clean.csv"))
 specialty_df <- read_csv(here("data/clean_data/specialty_clean.csv"))
 
 
-# PLOT STYLING
+# plot styling
 source("R/plot_themes.R")
 
 
-# INTERMEDIATE VARIABLES
+# Shared intermediate variables
 sidebarpanel_width = 3
 hb_choices <- unique(hb_names_df$hb_name)
 
 # age and gender intermediate variables
 age_choices <- unique(age_sex_df$age)
-age_default <- unique(age_sex_df$age)
+age_default <- age_choices
 
 sex_choices <- c("All", "Female", "Male")
 

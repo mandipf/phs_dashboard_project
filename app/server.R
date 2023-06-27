@@ -9,7 +9,8 @@ server <- function(input, output) {
         summarise(no_episodes = mean(episodes, na.rm = TRUE),
                   avg_length_of_stay = mean(length_of_stay, na.rm = TRUE),
                   .by = c(quarter, hb))
-    })
+    },
+    ignoreNULL = FALSE)
   
   output$home_plot_1 <- renderPlot({
     validate(
@@ -52,7 +53,8 @@ server <- function(input, output) {
         filter(hb %in% input$hb_input_home) %>% 
         summarise(avg_occupancy_percentage = mean(percentage_occupancy),
                   .by = c(quarter, hb))
-    })
+    },
+    ignoreNULL = FALSE)
   
   output$home_plot_2 <- renderPlot({
     validate(
@@ -86,7 +88,8 @@ server <- function(input, output) {
                   prop_stay = no_stay / no_admissions,
                   prop_discharge = no_discharge / no_admissions,
                   .by = c(month, season))
-    })
+    },
+    ignoreNULL = FALSE)
   
   output$ae_plot_1 <- renderPlot({
     validate(
@@ -145,7 +148,8 @@ server <- function(input, output) {
         summarise(mean_episodes = mean(episodes, na.rm = TRUE),
                   mean_length_stay = mean(length_of_stay, na.rm = TRUE),
                   .by = c(quarter, sex))
-    })
+    },
+    ignoreNULL = FALSE)
   
   output$age_gender_plot_1 <- renderPlot({
     validate(
@@ -196,7 +200,8 @@ server <- function(input, output) {
         summarise(mean_episodes = mean(episodes, na.rm = TRUE),
                   mean_length_of_stay = mean(length_of_stay, na.rm = TRUE),
                   .by = c(quarter, simd))
-    })
+    },
+    ignoreNULL = FALSE)
   
   output$simd_plot_1 <- renderPlot({
     validate(
@@ -249,7 +254,8 @@ server <- function(input, output) {
         summarise(mean_spell = mean(length_of_spell, na.rm = TRUE),
                   mean_episode = mean(episodes, na.rm = TRUE),
                   .by = c(quarter, specialty))
-    })
+    },
+    ignoreNULL = FALSE)
   
   output$specialty_plot_1 <- renderPlot({
     validate(
